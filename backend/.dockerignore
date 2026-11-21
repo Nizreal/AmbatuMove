@@ -1,0 +1,15 @@
+.git
+.env
+.tools
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.backup
+*.bak
+*.test
+coverage.out
+tmp/
+data/
+.vscode/
+.idea/
