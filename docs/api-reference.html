@@ -1,0 +1,2053 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Referensi API AmbatuMove</title><style>@page { size:A4; margin:18mm 17mm 18mm; @bottom-left {content:"AmbatuMove | v0.1.8"; font-size:9pt;color:#526171;} @bottom-right {content:counter(page) " / " counter(pages);font-size:9pt;color:#526171;} } *{box-sizing:border-box;} body{font:11pt/1.5 "DejaVu Sans",sans-serif;color:#152333;max-width:950px;margin:30px auto;padding:0 20px;} @media print{body{margin:0;padding:0;max-width:none;}} h1{font-size:25pt;line-height:1.2;color:#173b52;margin:0 0 12pt;} h2{font-size:16pt;color:#173b52;border-bottom:1px solid #c6d2db;padding-bottom:4pt;margin-top:22pt;break-after:avoid;} h3{font-size:12pt;color:#173b52;margin-top:14pt;break-after:avoid;} p{margin:6pt 0 9pt;} a{color:#155a80;text-decoration:none;} table{width:100%;border-collapse:collapse;margin:8pt 0 12pt;table-layout:fixed;font-size:9.5pt;} th,td{border-bottom:1px solid #dce3e8;text-align:left;padding:5pt;vertical-align:top;overflow-wrap:anywhere;} th{background:#e9eff3;color:#173b52;} tr{break-inside:avoid;} pre{background:#f1f4f6;border-left:3px solid #8aa6b7;padding:8pt;white-space:pre-wrap;overflow-wrap:anywhere;font:8.5pt/1.4 "DejaVu Sans Mono",monospace;} code{font-family:"DejaVu Sans Mono",monospace;font-size:.88em;overflow-wrap:anywhere;} .meta{color:#526171;font-size:10pt;} .op{margin:15pt 0 20pt;} .op h3{background:#e9eff3;padding:7pt;overflow-wrap:anywhere;} .small{font-size:9pt;} .section{break-before:page;} .toc li{margin:3pt 0;} strong{color:#173b52;} @media screen{body{background:white;} .op{border-bottom:1px solid #dce3e8;}}</style></head><body><h1>Referensi API AmbatuMove</h1><p class="meta">v0.1.8 · OpenAPI 3.1 · Contract 1.0.0 · 49 operations / 45 paths</p><p><strong>Base URL:</strong> <a href="https://nizdri.stei.fun">https://nizdri.stei.fun</a></p><p>Referensi ini dibuat dari kontrak OpenAPI pada release v0.1.8. URL bisnis menggunakan prefix /api/v1. Nama field, enum, contoh payload, dan skema JSON dipertahankan sesuai kontrak; deskripsi yang belum diterjemahkan tetap memakai teks kontrak. Untuk uji interaktif gunakan Swagger UI.</p><p><a href="https://nizdri.stei.fun/docs">Swagger UI</a> · <a href="https://nizdri.stei.fun/openapi.json">OpenAPI JSON (live)</a> · <a href="openapi.yaml">YAML</a> · <a href="api-reference.en.html">English</a></p><h2>Autentikasi dan penggunaan</h2><p>Endpoint publik dapat diakses tanpa key. Kirim header X-API-Key untuk API mitra sesuai scope. Gunakan Authorization: Bearer TOKEN untuk data pribadi. Operasi admin memerlukan role admin; save: true pada pembuatan latihan/program memerlukan JWT. Estimasi kalori berbasis MET.</p><table>
+<thead>
+<tr>
+  <th>Scope</th>
+  <th>API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>catalog:read</code></td>
+  <td>Latihan, peralatan, kelompok otot, kategori</td>
+</tr>
+<tr>
+  <td><code>gyms:read</code></td>
+  <td>Gym, peralatan, fasilitas</td>
+</tr>
+<tr>
+  <td><code>calories:estimate</code></td>
+  <td>Estimasi dan rekomendasi kalori</td>
+</tr>
+<tr>
+  <td><code>planner:preview</code></td>
+  <td>Pratinjau latihan/program, alternatif</td>
+</tr>
+</tbody>
+</table>
+<p>Batas bawaan: 60 request/menit publik, 120 mitra per kelompok rute, dan 5 untuk autentikasi. Gunakan timeout dan backoff untuk 429/503/504.</p><h2>Daftar endpoint</h2><h3><a href="#system">Operasi dan dokumentasi</a></h3><ul class="toc"><li><a href="#op-0"><code>GET /health</code></a></li><li><a href="#op-1"><code>GET /ready</code></a></li><li><a href="#op-46"><code>GET /openapi.json</code></a></li><li><a href="#op-47"><code>GET /docs</code></a></li></ul><h3><a href="#auth">Autentikasi dan profil</a></h3><ul class="toc"><li><a href="#op-24"><code>POST /api/v1/auth/register</code></a></li><li><a href="#op-25"><code>POST /api/v1/auth/login</code></a></li><li><a href="#op-26"><code>POST /api/v1/auth/refresh</code></a></li><li><a href="#op-27"><code>POST /api/v1/auth/logout</code></a></li><li><a href="#op-28"><code>GET /api/v1/me</code></a></li><li><a href="#op-29"><code>GET /api/v1/me/fitness-profile</code></a></li><li><a href="#op-30"><code>PUT /api/v1/me/fitness-profile</code></a></li></ul><h3><a href="#catalog">Katalog latihan</a></h3><ul class="toc"><li><a href="#op-2"><code>GET /api/v1/exercises</code></a></li><li><a href="#op-3"><code>GET /api/v1/exercises/{exercise_id}</code></a></li><li><a href="#op-4"><code>POST /api/v1/exercises/{exercise_id}/alternatives</code></a></li><li><a href="#op-5"><code>GET /api/v1/equipment</code></a></li><li><a href="#op-6"><code>GET /api/v1/muscle-groups</code></a></li><li><a href="#op-7"><code>GET /api/v1/exercise-categories</code></a></li></ul><h3><a href="#gyms">Direktori gym dan moderasi</a></h3><ul class="toc"><li><a href="#op-11"><code>GET /api/v1/gyms</code></a></li><li><a href="#op-12"><code>GET /api/v1/gyms/{gym_id}</code></a></li><li><a href="#op-13"><code>GET /api/v1/gyms/{gym_id}/equipment</code></a></li><li><a href="#op-14"><code>GET /api/v1/gyms/{gym_id}/facilities</code></a></li><li><a href="#op-15"><code>POST /api/v1/gyms/submissions</code></a></li><li><a href="#op-16"><code>GET /api/v1/gyms/submissions/{submission_id}</code></a></li><li><a href="#op-17"><code>GET /api/v1/admin/gym-submissions</code></a></li><li><a href="#op-18"><code>POST /api/v1/admin/gym-submissions/{submission_id}/review</code></a></li><li><a href="#op-19"><code>PATCH /api/v1/admin/gyms/{gym_id}</code></a></li><li><a href="#op-20"><code>GET /api/v1/facilities</code></a></li></ul><h3><a href="#calories">Kalori</a></h3><ul class="toc"><li><a href="#op-21"><code>GET /api/v1/calories/activities</code></a></li><li><a href="#op-22"><code>GET /api/v1/calories/estimate</code></a></li><li><a href="#op-23"><code>POST /api/v1/calories/estimate-workout</code></a></li><li><a href="#op-48"><code>GET /api/v1/calories/recommendations</code></a></li></ul><h3><a href="#workouts">Rencana latihan</a></h3><ul class="toc"><li><a href="#op-8"><code>POST /api/v1/workouts/generate</code></a></li><li><a href="#op-9"><code>POST /api/v1/workouts/adapt-preview</code></a></li><li><a href="#op-31"><code>GET /api/v1/workouts</code></a></li><li><a href="#op-32"><code>GET /api/v1/workouts/{workout_id}</code></a></li><li><a href="#op-33"><code>PATCH /api/v1/workouts/{workout_id}</code></a></li><li><a href="#op-34"><code>DELETE /api/v1/workouts/{workout_id}</code></a></li><li><a href="#op-35"><code>POST /api/v1/workouts/{workout_id}/adapt</code></a></li><li><a href="#op-36"><code>POST /api/v1/workouts/{workout_id}/items/{item_id}/replace</code></a></li></ul><h3><a href="#programs">Program latihan</a></h3><ul class="toc"><li><a href="#op-10"><code>POST /api/v1/programs/generate</code></a></li><li><a href="#op-41"><code>GET /api/v1/programs</code></a></li><li><a href="#op-42"><code>GET /api/v1/programs/{program_id}</code></a></li><li><a href="#op-43"><code>DELETE /api/v1/programs/{program_id}</code></a></li><li><a href="#op-44"><code>POST /api/v1/programs/{program_id}/adapt</code></a></li><li><a href="#op-45"><code>PATCH /api/v1/programs/{program_id}/schedule</code></a></li></ul><h3><a href="#tracking">Pencatatan dan statistik</a></h3><ul class="toc"><li><a href="#op-37"><code>POST /api/v1/workouts/{workout_id}/complete</code></a></li><li><a href="#op-38"><code>GET /api/v1/workout-logs</code></a></li><li><a href="#op-39"><code>GET /api/v1/workout-logs/{log_id}</code></a></li><li><a href="#op-40"><code>GET /api/v1/stats/summary</code></a></li></ul><p><a href="#schemas">Lampiran skema JSON (50 skema)</a></p><h2 class="section" id="system">Operasi dan dokumentasi</h2><div class="op" id="op-0"><h3><code>GET /health</code></h3><p><strong>Pemeriksaan proses</strong></p><p class="small">Akses: Publik</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Proses aktif</td><td><span class="small">application/json</span> <a href="#schema-HealthStatus"><code>HealthStatus</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-1"><h3><code>GET /ready</code></h3><p><strong>Pemeriksaan kesiapan</strong></p><p class="small">Akses: Publik</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Database siap</td><td><span class="small">application/json</span> <a href="#schema-HealthStatus"><code>HealthStatus</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>503</td><td>Database tidak tersedia</td><td><span class="small">application/json</span> <a href="#schema-HealthStatus"><code>HealthStatus</code></a></td></tr></tbody></table></div><div class="op" id="op-46"><h3><code>GET /openapi.json</code></h3><p><strong>Unduh kontrak OpenAPI 3.1</strong></p><p class="small">Akses: Publik</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Kontrak yang digunakan dokumentasi API saat runtime</td><td><span class="small">application/json</span> <code>{&quot;type&quot;: &quot;object&quot;, &quot;additionalProperties&quot;: true}</code></td></tr></tbody></table></div><div class="op" id="op-47"><h3><code>GET /docs</code></h3><p><strong>Dokumentasi API interaktif</strong></p><p class="small">Akses: Publik</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Dokumen HTML Swagger UI</td><td><span class="small">text/html</span> <code>{&quot;type&quot;: &quot;string&quot;}</code></td></tr></tbody></table></div><h2 class="section" id="auth">Autentikasi dan profil</h2><div class="op" id="op-24"><h3><code>POST /api/v1/auth/register</code></h3><p><strong>Registrasi pengguna uji</strong></p><p class="small">Akses: Publik</p><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-TokenRequest"><code>TokenRequest</code></a></p><p class="small">Contoh: request</p><pre>{
+  &quot;email&quot;: &quot;athlete@example.test&quot;,
+  &quot;password&quot;: &quot;correct-horse-battery-staple&quot;
+}</pre><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>201</td><td>Akun dan pasangan token</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeTokenPair"><code>EnvelopeTokenPair</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-25"><h3><code>POST /api/v1/auth/login</code></h3><p><strong>Login pengguna</strong></p><p class="small">Akses: Publik</p><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-TokenRequest"><code>TokenRequest</code></a></p><p class="small">Contoh: request</p><pre>{
+  &quot;email&quot;: &quot;athlete@example.test&quot;,
+  &quot;password&quot;: &quot;correct-horse-battery-staple&quot;
+}</pre><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Pasangan token</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeTokenPair"><code>EnvelopeTokenPair</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-26"><h3><code>POST /api/v1/auth/refresh</code></h3><p><strong>Rotasi refresh token</strong></p><p class="small">Akses: Publik</p><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-RefreshRequest"><code>RefreshRequest</code></a></p><p class="small">Contoh: request</p><pre>{
+  &quot;refresh_token&quot;: &quot;&lt;refresh-token&gt;&quot;
+}</pre><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Pasangan token baru</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeTokenPair"><code>EnvelopeTokenPair</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-27"><h3><code>POST /api/v1/auth/logout</code></h3><p><strong>Cabut sesi aktif</strong></p><p class="small">Akses: JWT</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>204</td><td>Dicabut</td><td>Tanpa body</td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-28"><h3><code>GET /api/v1/me</code></h3><p><strong>Lihat akun sendiri</strong></p><p class="small">Akses: JWT</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Data akun tanpa kredensial sensitif</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeUser"><code>EnvelopeUser</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-29"><h3><code>GET /api/v1/me/fitness-profile</code></h3><p><strong>Lihat profil kebugaran sendiri</strong></p><p class="small">Akses: JWT</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Profil</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeFitnessProfile"><code>EnvelopeFitnessProfile</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-30"><h3><code>PUT /api/v1/me/fitness-profile</code></h3><p><strong>Ganti profil kebugaran sendiri</strong></p><p class="small">Akses: JWT</p><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-FitnessProfile"><code>FitnessProfile</code></a></p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Profil diperbarui</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeFitnessProfile"><code>EnvelopeFitnessProfile</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><h2 class="section" id="catalog">Katalog latihan</h2><div class="op" id="op-2"><h3><code>GET /api/v1/exercises</code></h3><p><strong>Cari katalog latihan dan aktivitas</strong></p><p class="small">Akses: Publik / X-API-Key</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>q</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br>Pencarian nama</td></tr><tr><td><code>category</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br>strength, cardio, atau mobility</td></tr><tr><td><code>muscle_group</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br>ID kelompok otot kanonis</td></tr><tr><td><code>equipment</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}}</code><br>ID peralatan kanonis, dapat diulang</td></tr><tr><td><code>difficulty</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br>Tingkat pengalaman yang didukung</td></tr><tr><td><code>environment</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br>home, gym, indoor, atau outdoor</td></tr><tr><td><code>measurement_type</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br>Filter jenis pengukuran</td></tr><tr><td><code>limit</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 1, &quot;maximum&quot;: 100}</code><br>Jumlah per halaman, 1..100</td></tr><tr><td><code>offset</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 0}</code><br>Offset baris mulai dari nol</td></tr><tr><td><code>sort</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br>name, difficulty, category, atau id</td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Ringkasan latihan dengan paginasi</td><td><span class="small">application/json</span> <a href="#schema-PaginatedResponse"><code>PaginatedResponse</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-3"><h3><code>GET /api/v1/exercises/{exercise_id}</code></h3><p><strong>Detail latihan</strong></p><p class="small">Akses: Publik / X-API-Key</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>exercise_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Detail latihan</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeExercise"><code>EnvelopeExercise</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-4"><h3><code>POST /api/v1/exercises/{exercise_id}/alternatives</code></h3><p><strong>Cari alternatif latihan yang sesuai</strong></p><p class="small">Akses: Publik / X-API-Key</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>exercise_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-AlternativeRequest"><code>AlternativeRequest</code></a></p><p class="small">Contoh: request</p><pre>{
+  &quot;available_equipment&quot;: [
+    &quot;bodyweight&quot;
+  ],
+  &quot;experience_level&quot;: &quot;beginner&quot;,
+  &quot;environment&quot;: &quot;home&quot;,
+  &quot;space&quot;: &quot;small&quot;,
+  &quot;goal&quot;: &quot;strength&quot;,
+  &quot;max_results&quot;: 5
+}</pre><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Alternatif terurut</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>503</td><td>Planner sedang sibuk</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>504</td><td>Waktu proses planner melebihi PLANNER_MAX_GENERATION_MS</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-5"><h3><code>GET /api/v1/equipment</code></h3><p><strong>Daftar jenis peralatan</strong></p><p class="small">Akses: Publik / X-API-Key</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Daftar peralatan</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-6"><h3><code>GET /api/v1/muscle-groups</code></h3><p><strong>Daftar kelompok otot</strong></p><p class="small">Akses: Publik / X-API-Key</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Daftar kelompok otot</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-7"><h3><code>GET /api/v1/exercise-categories</code></h3><p><strong>Daftar kategori latihan</strong></p><p class="small">Akses: Publik / X-API-Key</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Daftar kategori</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><h2 class="section" id="gyms">Direktori gym dan moderasi</h2><div class="op" id="op-11"><h3><code>GET /api/v1/gyms</code></h3><p><strong>Cari gym berdasarkan lokasi, peralatan, dan fasilitas</strong></p><p class="small">Akses: Publik / X-API-Key</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>q</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br>Nama atau alamat gym</td></tr><tr><td><code>latitude</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;number&quot;}</code><br>Lintang; sertakan bujur</td></tr><tr><td><code>longitude</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;number&quot;}</code><br>Bujur; sertakan lintang</td></tr><tr><td><code>radius_km</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;number&quot;}</code><br>Radius pencarian; memerlukan koordinat</td></tr><tr><td><code>equipment</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}}</code><br>ID peralatan kanonis yang dapat diulang; semua filter berlaku</td></tr><tr><td><code>facility</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}}</code><br>ID fasilitas yang dapat diulang; semua filter berlaku</td></tr><tr><td><code>verification_status</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br>Filter status verifikasi</td></tr><tr><td><code>limit</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 1, &quot;maximum&quot;: 100}</code><br>Jumlah per halaman</td></tr><tr><td><code>offset</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 0}</code><br>Offset baris mulai dari nol</td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Direktori gym dengan paginasi</td><td><span class="small">application/json</span> <a href="#schema-PaginatedResponse"><code>PaginatedResponse</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-12"><h3><code>GET /api/v1/gyms/{gym_id}</code></h3><p><strong>Detail gym</strong></p><p class="small">Akses: Publik / X-API-Key</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>gym_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Detail gym dan kebaruan sumber</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeGym"><code>EnvelopeGym</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-13"><h3><code>GET /api/v1/gyms/{gym_id}/equipment</code></h3><p><strong>Inventaris peralatan gym</strong></p><p class="small">Akses: Publik / X-API-Key</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>gym_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Inventaris</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-14"><h3><code>GET /api/v1/gyms/{gym_id}/facilities</code></h3><p><strong>Fasilitas gym</strong></p><p class="small">Akses: Publik / X-API-Key</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>gym_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Fasilitas</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-15"><h3><code>POST /api/v1/gyms/submissions</code></h3><p><strong>Ajukan gym atau koreksi untuk moderasi</strong></p><p class="small">Akses: JWT</p><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-GymSubmissionRequest"><code>GymSubmissionRequest</code></a></p><p class="small">Contoh: request</p><pre>{
+  &quot;gym_id&quot;: &quot;gym_demo_jakarta_001&quot;,
+  &quot;submission_type&quot;: &quot;equipment_correction&quot;,
+  &quot;changes&quot;: {
+    &quot;equipment&quot;: [
+      {
+        &quot;equipment_id&quot;: &quot;dumbbell&quot;,
+        &quot;quantity&quot;: 8,
+        &quot;status&quot;: &quot;present&quot;
+      }
+    ]
+  },
+  &quot;evidence&quot;: []
+}</pre><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>201</td><td>Pengajuan menunggu tinjauan</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-16"><h3><code>GET /api/v1/gyms/submissions/{submission_id}</code></h3><p><strong>Lihat pengajuan gym sendiri</strong></p><p class="small">Akses: JWT</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>submission_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Status pengajuan</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-17"><h3><code>GET /api/v1/admin/gym-submissions</code></h3><p><strong>Daftar pengajuan (admin)</strong></p><p class="small">Akses: JWT admin</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Pengajuan yang menunggu dan telah ditinjau</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-18"><h3><code>POST /api/v1/admin/gym-submissions/{submission_id}/review</code></h3><p><strong>Setujui atau tolak pengajuan (admin)</strong></p><p class="small">Akses: JWT admin</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>submission_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-GymReviewRequest"><code>GymReviewRequest</code></a></p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Hasil tinjauan dan audit tersimpan</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-19"><h3><code>PATCH /api/v1/admin/gyms/{gym_id}</code></h3><p><strong>Perbarui data gym (admin)</strong></p><p class="small">Akses: JWT admin</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>gym_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-GymAdminPatch"><code>GymAdminPatch</code></a></p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Gym diperbarui</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-20"><h3><code>GET /api/v1/facilities</code></h3><p><strong>Daftar jenis fasilitas</strong></p><p class="small">Akses: Publik / X-API-Key</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Fasilitas</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><h2 class="section" id="calories">Kalori</h2><div class="op" id="op-21"><h3><code>GET /api/v1/calories/activities</code></h3><p><strong>Daftar profil MET</strong></p><p class="small">Akses: Publik / X-API-Key</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>activity</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br>Filter kategori aktivitas</td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Referensi MET aktivitas</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-22"><h3><code>GET /api/v1/calories/estimate</code></h3><p><strong>Estimasi kalori dengan rumus MET</strong></p><p class="small">Akses: Publik / X-API-Key</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>activity_id</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br>ID referensi aktivitas</td></tr><tr><td><code>activity</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br>Kategori aktivitas jika ID tidak digunakan</td></tr><tr><td><code>intensity</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br>Intensitas profil MET</td></tr><tr><td><code>duration_minutes</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;number&quot;, &quot;exclusiveMinimum&quot;: 0}</code><br>Durasi aktivitas</td></tr><tr><td><code>weight_kg</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;number&quot;, &quot;exclusiveMinimum&quot;: 0}</code><br>Berat badan atau nilai bawaan profil pengguna yang login</td></tr><tr><td><code>speed_kmh</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;number&quot;}</code><br>Kecepatan aktivitas (opsional)</td></tr><tr><td><code>pace_seconds_per_km</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;number&quot;}</code><br>Pace lari (opsional)</td></tr><tr><td><code>estimate_type</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;gross&quot;, &quot;net&quot;]}</code><br>gross atau net</td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Estimasi beserta sumber dan batasannya</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeCalorieEstimate"><code>EnvelopeCalorieEstimate</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Aktivitas atau intensitas tidak didukung</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-23"><h3><code>POST /api/v1/calories/estimate-workout</code></h3><p><strong>Estimasi kalori untuk segmen latihan</strong></p><p class="small">Akses: JWT / X-API-Key</p><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-WorkoutCaloriesRequest"><code>WorkoutCaloriesRequest</code></a></p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Estimasi tiap segmen dan total</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-48"><h3><code>GET /api/v1/calories/recommendations</code></h3><p><strong>Rekomendasi aktivitas untuk target kalori</strong></p><p class="small">Akses: Publik / X-API-Key</p><p>Stateless gross MET estimate. Required duration is rounded up to a whole minute; each returned estimate is recalculated at its recommended (possibly capped) duration. Results are deterministically ordered, and partial alternatives are returned when the target cannot be met within the maximum duration.</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>target_kcal</code><br>query</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;number&quot;, &quot;exclusiveMinimum&quot;: 0, &quot;maximum&quot;: 10000}</code><br>Target kalori gross positif.</td></tr><tr><td><code>weight_kg</code><br>query</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;number&quot;, &quot;minimum&quot;: 20, &quot;maximum&quot;: 300}</code><br>Berat badan dalam kg; endpoint publik ini tidak mengambil berat dari profil.</td></tr><tr><td><code>max_duration_minutes</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 1, &quot;maximum&quot;: 1440, &quot;default&quot;: 180}</code><br>Durasi maksimal; bawaan 180 menit.</td></tr><tr><td><code>available_equipment</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}, &quot;maxItems&quot;: 20}</code><br>Ulangi untuk setiap ID peralatan. Tanpa gym_id, parameter kosong atau tidak disertakan hanya mengizinkan aktivitas bodyweight/tanpa peralatan. Dengan gym_id, parameter yang tidak disertakan memakai inventaris gym; daftar eksplisit diiriskan dengan inventaris tersebut.</td></tr><tr><td><code>excluded_equipment</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}, &quot;maxItems&quot;: 20}</code><br>Ulangi parameter untuk ID peralatan yang tidak boleh dipakai.</td></tr><tr><td><code>gym_id</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br>Gunakan inventaris aktif yang tercatat; gym tak dikenal mengembalikan 404.</td></tr><tr><td><code>environment</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;home&quot;, &quot;gym&quot;, &quot;indoor&quot;, &quot;outdoor&quot;]}</code><br>Batasan lingkungan.</td></tr><tr><td><code>experience_level</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;beginner&quot;, &quot;intermediate&quot;, &quot;advanced&quot;]}</code><br>Bawaan beginner.</td></tr><tr><td><code>category</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;cardio&quot;, &quot;strength&quot;, &quot;mobility&quot;]}</code><br>Filter kategori latihan (opsional).</td></tr><tr><td><code>max_intensity</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;low&quot;, &quot;moderate&quot;, &quot;vigorous&quot;]}</code><br>Batas intensitas; bawaan moderate.</td></tr><tr><td><code>excluded_exercise_ids</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}, &quot;maxItems&quot;: 100}</code><br>Ulangi parameter untuk setiap ID aktivitas yang dikecualikan.</td></tr><tr><td><code>limit</code><br>query</td><td>Tidak</td><td><code>{&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 1, &quot;maximum&quot;: 20, &quot;default&quot;: 8}</code><br>Jumlah alternatif (1 sampai 20); bawaan 8.</td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Rekomendasi sesuai batasan, termasuk alternatif parsial jika tersedia.</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeCalorieRecommendationResult"><code>EnvelopeCalorieRecommendationResult</code></a></td></tr><tr><td>400</td><td>Parameter query hilang, tidak valid, ganda, tidak didukung, atau di luar rentang.</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Kredensial bearer atau mitra tidak valid.</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Kredensial tidak memiliki scope mitra yang diperlukan.</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Gym yang dipilih tidak ditemukan.</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request publik atau mitra terlampaui.</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server.</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><h2 class="section" id="workouts">Rencana latihan</h2><div class="op" id="op-8"><h3><code>POST /api/v1/workouts/generate</code></h3><p><strong>Buat rencana latihan deterministik</strong></p><p class="small">Akses: Publik / JWT / X-API-Key</p><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-WorkoutGenerateRequest"><code>WorkoutGenerateRequest</code></a></p><p class="small">Contoh: request</p><pre>{
+  &quot;goal&quot;: &quot;endurance&quot;,
+  &quot;workout_type&quot;: &quot;mixed&quot;,
+  &quot;duration_minutes&quot;: 40,
+  &quot;experience_level&quot;: &quot;beginner&quot;,
+  &quot;environment&quot;: &quot;outdoor&quot;,
+  &quot;space&quot;: &quot;unrestricted&quot;,
+  &quot;available_equipment&quot;: [
+    &quot;bodyweight&quot;
+  ],
+  &quot;preferred_activity_ids&quot;: [
+    &quot;act_walk_outdoor&quot;
+  ],
+  &quot;seed&quot;: 42
+}</pre><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Pratinjau latihan atau latihan tersimpan</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeWorkoutSession"><code>EnvelopeWorkoutSession</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan tidak valid atau tidak dapat dipenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>503</td><td>Planner sedang sibuk</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>504</td><td>Waktu proses planner melebihi PLANNER_MAX_GENERATION_MS</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-9"><h3><code>POST /api/v1/workouts/adapt-preview</code></h3><p><strong>Pratinjau adaptasi latihan</strong></p><p class="small">Akses: Publik / X-API-Key</p><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-AdaptPreviewRequest"><code>AdaptPreviewRequest</code></a></p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Usulan adaptasi tanpa penyimpanan</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeAdaptResult"><code>EnvelopeAdaptResult</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>503</td><td>Planner sedang sibuk</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>504</td><td>Waktu proses planner melebihi PLANNER_MAX_GENERATION_MS</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-31"><h3><code>GET /api/v1/workouts</code></h3><p><strong>Daftar latihan tersimpan</strong></p><p class="small">Akses: JWT</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Latihan dengan paginasi</td><td><span class="small">application/json</span> <a href="#schema-PaginatedResponse"><code>PaginatedResponse</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-32"><h3><code>GET /api/v1/workouts/{workout_id}</code></h3><p><strong>Lihat latihan tersimpan</strong></p><p class="small">Akses: JWT</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>workout_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Latihan</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeWorkoutSession"><code>EnvelopeWorkoutSession</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-33"><h3><code>PATCH /api/v1/workouts/{workout_id}</code></h3><p><strong>Perbarui status latihan dengan pemeriksaan versi</strong></p><p class="small">Akses: JWT</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>workout_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-WorkoutUpdateRequest"><code>WorkoutUpdateRequest</code></a></p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Latihan diperbarui</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeWorkoutSession"><code>EnvelopeWorkoutSession</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Konflik versi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-34"><h3><code>DELETE /api/v1/workouts/{workout_id}</code></h3><p><strong>Arsipkan latihan</strong></p><p class="small">Akses: JWT</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>workout_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>204</td><td>Diarsipkan</td><td>Tanpa body</td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-35"><h3><code>POST /api/v1/workouts/{workout_id}/adapt</code></h3><p><strong>Adaptasi latihan tersimpan dengan pemeriksaan versi</strong></p><p class="small">Akses: JWT</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>workout_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-WorkoutAdaptRequest"><code>WorkoutAdaptRequest</code></a></p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Latihan diperbarui</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeWorkoutSession"><code>EnvelopeWorkoutSession</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Konflik versi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>503</td><td>Planner sedang sibuk</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>504</td><td>Waktu proses planner melebihi PLANNER_MAX_GENERATION_MS</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-36"><h3><code>POST /api/v1/workouts/{workout_id}/items/{item_id}/replace</code></h3><p><strong>Ganti item latihan</strong></p><p class="small">Akses: JWT</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>workout_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr><tr><td><code>item_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-WorkoutReplaceRequest"><code>WorkoutReplaceRequest</code></a></p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Latihan diperbarui</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>503</td><td>Planner sedang sibuk</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>504</td><td>Waktu proses planner melebihi PLANNER_MAX_GENERATION_MS</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><h2 class="section" id="programs">Program latihan</h2><div class="op" id="op-10"><h3><code>POST /api/v1/programs/generate</code></h3><p><strong>Buat program mingguan atau beberapa minggu</strong></p><p class="small">Akses: Publik / JWT / X-API-Key</p><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-ProgramGenerateRequest"><code>ProgramGenerateRequest</code></a></p><p class="small">Contoh: request</p><pre>{
+  &quot;goal&quot;: &quot;endurance&quot;,
+  &quot;workout_type&quot;: &quot;cardio&quot;,
+  &quot;experience_level&quot;: &quot;beginner&quot;,
+  &quot;weeks&quot;: 4,
+  &quot;days_per_week&quot;: 3,
+  &quot;start_date&quot;: &quot;2026-12-01&quot;,
+  &quot;timezone&quot;: &quot;Asia/Jakarta&quot;,
+  &quot;available_days&quot;: [
+    &quot;monday&quot;,
+    &quot;wednesday&quot;,
+    &quot;saturday&quot;
+  ],
+  &quot;session_duration_minutes&quot;: 30,
+  &quot;environment&quot;: &quot;outdoor&quot;,
+  &quot;space&quot;: &quot;unrestricted&quot;,
+  &quot;seed&quot;: 42
+}</pre><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Pratinjau program atau program tersimpan</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeProgram"><code>EnvelopeProgram</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>503</td><td>Planner sedang sibuk</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>504</td><td>Waktu proses planner melebihi PLANNER_MAX_GENERATION_MS</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-41"><h3><code>GET /api/v1/programs</code></h3><p><strong>Daftar program tersimpan</strong></p><p class="small">Akses: JWT</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Program dengan paginasi</td><td><span class="small">application/json</span> <a href="#schema-PaginatedResponse"><code>PaginatedResponse</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-42"><h3><code>GET /api/v1/programs/{program_id}</code></h3><p><strong>Lihat program tersimpan</strong></p><p class="small">Akses: JWT</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>program_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Program</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeProgram"><code>EnvelopeProgram</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-43"><h3><code>DELETE /api/v1/programs/{program_id}</code></h3><p><strong>Arsipkan program</strong></p><p class="small">Akses: JWT</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>program_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>204</td><td>Diarsipkan</td><td>Tanpa body</td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-44"><h3><code>POST /api/v1/programs/{program_id}/adapt</code></h3><p><strong>Adaptasi sesi mendatang dalam program</strong></p><p class="small">Akses: JWT</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>program_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-ProgramAdaptRequest"><code>ProgramAdaptRequest</code></a></p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Program diperbarui</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeProgram"><code>EnvelopeProgram</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Konflik versi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>503</td><td>Planner sedang sibuk</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>504</td><td>Waktu proses planner melebihi PLANNER_MAX_GENERATION_MS</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-45"><h3><code>PATCH /api/v1/programs/{program_id}/schedule</code></h3><p><strong>Pindahkan latihan mendatang ke hari istirahat</strong></p><p class="small">Akses: JWT</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>program_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-ProgramScheduleRequest"><code>ProgramScheduleRequest</code></a></p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Jadwal diperbarui</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Konflik versi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><h2 class="section" id="tracking">Pencatatan dan statistik</h2><div class="op" id="op-37"><h3><code>POST /api/v1/workouts/{workout_id}/complete</code></h3><p><strong>Catat pelaksanaan latihan dengan Idempotency-Key</strong></p><p class="small">Akses: JWT</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>workout_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Request body</h3><p><code>application/json</code> · Wajib · <a href="#schema-WorkoutCompletionRequest"><code>WorkoutCompletionRequest</code></a></p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>201</td><td>Catatan latihan</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik idempotensi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-38"><h3><code>GET /api/v1/workout-logs</code></h3><p><strong>Daftar riwayat aktivitas</strong></p><p class="small">Akses: JWT</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Riwayat aktivitas dengan paginasi</td><td><span class="small">application/json</span> <a href="#schema-PaginatedResponse"><code>PaginatedResponse</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-39"><h3><code>GET /api/v1/workout-logs/{log_id}</code></h3><p><strong>Lihat catatan aktivitas</strong></p><p class="small">Akses: JWT</p><h3>Parameter</h3><table><thead><tr><th style="width:28%">Nama / lokasi</th><th style="width:13%">Wajib</th><th>Skema dan keterangan</th></tr></thead><tbody><tr><td><code>log_id</code><br>path</td><td>Ya</td><td><code>{&quot;type&quot;: &quot;string&quot;}</code><br></td></tr></tbody></table><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Catatan aktivitas</td><td><span class="small">application/json</span> <a href="#schema-EnvelopeWorkoutLog"><code>EnvelopeWorkoutLog</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><div class="op" id="op-40"><h3><code>GET /api/v1/stats/summary</code></h3><p><strong>Ringkasan riwayat aktivitas</strong></p><p class="small">Akses: JWT</p><h3>Respons HTTP</h3><table><thead><tr><th style="width:12%">HTTP</th><th style="width:44%">Keterangan</th><th>Skema / format</th></tr></thead><tbody><tr><td>200</td><td>Jumlah sesi, menit, volume, dan aktivitas</td><td><span class="small">application/json</span> <a href="#schema-Success"><code>Success</code></a></td></tr><tr><td>400</td><td>Request tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>401</td><td>Autentikasi diperlukan atau kredensial tidak valid</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>403</td><td>Scope akses tidak mencukupi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>404</td><td>Resource tidak ditemukan</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>409</td><td>Konflik status</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>412</td><td>Prasyarat versi gagal</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>413</td><td>Request body terlalu besar</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>422</td><td>Batasan bisnis tidak terpenuhi</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>429</td><td>Batas request terlampaui</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr><tr><td>500</td><td>Kesalahan server</td><td><span class="small">application/json</span> <a href="#schema-Error"><code>Error</code></a></td></tr></tbody></table></div><h2 class="section" id="schemas">Lampiran skema JSON</h2><p>Definisi berikut berasal langsung dari components.schemas. Referensi $ref menggunakan nama skema dalam lampiran ini.</p><h3 id="schema-Success">Success</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [
+    &quot;data&quot;,
+    &quot;meta&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;data&quot;: {},
+    &quot;meta&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;request_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    }
+  },
+  &quot;example&quot;: {
+    &quot;data&quot;: {},
+    &quot;meta&quot;: {
+      &quot;request_id&quot;: &quot;request-id&quot;
+    }
+  }
+}</pre><h3 id="schema-Error">Error</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [
+    &quot;error&quot;,
+    &quot;meta&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;error&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [
+        &quot;code&quot;,
+        &quot;message&quot;
+      ],
+      &quot;properties&quot;: {
+        &quot;code&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;message&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;details&quot;: {}
+      }
+    },
+    &quot;meta&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;request_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    }
+  },
+  &quot;example&quot;: {
+    &quot;error&quot;: {
+      &quot;code&quot;: &quot;VALIDATION_ERROR&quot;,
+      &quot;message&quot;: &quot;The request is invalid.&quot;,
+      &quot;details&quot;: null
+    },
+    &quot;meta&quot;: {
+      &quot;request_id&quot;: &quot;request-id&quot;
+    }
+  }
+}</pre><h3 id="schema-WorkoutGenerateRequest">WorkoutGenerateRequest</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;goal&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;general_fitness&quot;,
+        &quot;strength&quot;,
+        &quot;hypertrophy&quot;,
+        &quot;endurance&quot;,
+        &quot;mobility&quot;,
+        &quot;active_recovery&quot;
+      ]
+    },
+    &quot;workout_type&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;strength&quot;,
+        &quot;cardio&quot;,
+        &quot;mobility&quot;,
+        &quot;mixed&quot;
+      ]
+    },
+    &quot;duration_minutes&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 5,
+      &quot;maximum&quot;: 180
+    },
+    &quot;experience_level&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;beginner&quot;,
+        &quot;intermediate&quot;,
+        &quot;advanced&quot;
+      ]
+    },
+    &quot;environment&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;home&quot;,
+        &quot;gym&quot;,
+        &quot;indoor&quot;,
+        &quot;outdoor&quot;
+      ]
+    },
+    &quot;space&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;small&quot;,
+        &quot;medium&quot;,
+        &quot;large&quot;,
+        &quot;unrestricted&quot;
+      ]
+    },
+    &quot;available_equipment&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;unavailable_equipment&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;excluded_exercise_ids&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;focus_muscles&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;gym_id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;equipment_source&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;gym_inventory&quot;,
+        &quot;explicit&quot;
+      ]
+    },
+    &quot;preferred_activity_ids&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;intensity&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;low&quot;,
+        &quot;moderate&quot;,
+        &quot;vigorous&quot;
+      ]
+    },
+    &quot;save&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;
+    },
+    &quot;seed&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;format&quot;: &quot;int64&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;goal&quot;,
+    &quot;workout_type&quot;,
+    &quot;duration_minutes&quot;,
+    &quot;experience_level&quot;,
+    &quot;environment&quot;
+  ],
+  &quot;example&quot;: {
+    &quot;goal&quot;: &quot;general_fitness&quot;,
+    &quot;workout_type&quot;: &quot;mixed&quot;,
+    &quot;duration_minutes&quot;: 40,
+    &quot;experience_level&quot;: &quot;beginner&quot;,
+    &quot;environment&quot;: &quot;indoor&quot;,
+    &quot;available_equipment&quot;: [
+      &quot;bodyweight&quot;,
+      &quot;treadmill&quot;
+    ],
+    &quot;preferred_activity_ids&quot;: [
+      &quot;act_walk_treadmill&quot;
+    ],
+    &quot;seed&quot;: 44
+  }
+}</pre><h3 id="schema-ConstraintChanges">ConstraintChanges</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;duration_minutes&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 5,
+      &quot;maximum&quot;: 180
+    },
+    &quot;environment&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;home&quot;,
+        &quot;gym&quot;,
+        &quot;indoor&quot;,
+        &quot;outdoor&quot;
+      ]
+    },
+    &quot;space&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;small&quot;,
+        &quot;medium&quot;,
+        &quot;large&quot;,
+        &quot;unrestricted&quot;
+      ]
+    },
+    &quot;available_equipment&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;unavailable_equipment&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    }
+  }
+}</pre><h3 id="schema-AdaptPreviewRequest">AdaptPreviewRequest</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;workout&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/WorkoutSession&quot;
+    },
+    &quot;changes&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/ConstraintChanges&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;workout&quot;,
+    &quot;changes&quot;
+  ]
+}</pre><h3 id="schema-AlternativeRequest">AlternativeRequest</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;available_equipment&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;unavailable_equipment&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;experience_level&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;beginner&quot;,
+        &quot;intermediate&quot;,
+        &quot;advanced&quot;
+      ]
+    },
+    &quot;environment&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;home&quot;,
+        &quot;gym&quot;,
+        &quot;indoor&quot;,
+        &quot;outdoor&quot;
+      ]
+    },
+    &quot;space&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;small&quot;,
+        &quot;medium&quot;,
+        &quot;large&quot;,
+        &quot;unrestricted&quot;
+      ]
+    },
+    &quot;goal&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;max_results&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 1,
+      &quot;maximum&quot;: 10
+    },
+    &quot;excluded_exercise_ids&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    }
+  },
+  &quot;required&quot;: [
+    &quot;available_equipment&quot;,
+    &quot;experience_level&quot;,
+    &quot;environment&quot;,
+    &quot;goal&quot;,
+    &quot;max_results&quot;
+  ]
+}</pre><h3 id="schema-WorkoutSession">WorkoutSession</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;id&quot;: {
+      &quot;type&quot;: [
+        &quot;string&quot;,
+        &quot;null&quot;
+      ]
+    },
+    &quot;saved&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;
+    },
+    &quot;version&quot;: {
+      &quot;type&quot;: &quot;integer&quot;
+    },
+    &quot;goal&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;workout_type&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;status&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;constraints&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;duration_minutes&quot;: {
+          &quot;type&quot;: &quot;integer&quot;
+        },
+        &quot;environment&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;available_equipment&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          }
+        },
+        &quot;unavailable_equipment&quot;: {
+          &quot;type&quot;: &quot;array&quot;,
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          }
+        },
+        &quot;experience_level&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;space&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    },
+    &quot;planned_duration_seconds&quot;: {
+      &quot;type&quot;: &quot;integer&quot;
+    },
+    &quot;estimated_duration_seconds&quot;: {
+      &quot;type&quot;: &quot;integer&quot;
+    },
+    &quot;sections&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;type&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;type&quot;: &quot;object&quot;,
+              &quot;properties&quot;: {
+                &quot;item_id&quot;: {
+                  &quot;type&quot;: &quot;string&quot;
+                },
+                &quot;exercise_id&quot;: {
+                  &quot;type&quot;: &quot;string&quot;
+                },
+                &quot;order&quot;: {
+                  &quot;type&quot;: &quot;integer&quot;
+                },
+                &quot;prescription&quot;: {
+                  &quot;type&quot;: &quot;object&quot;,
+                  &quot;additionalProperties&quot;: true
+                },
+                &quot;estimated_duration_seconds&quot;: {
+                  &quot;type&quot;: &quot;integer&quot;
+                }
+              },
+              &quot;required&quot;: [
+                &quot;item_id&quot;,
+                &quot;exercise_id&quot;,
+                &quot;order&quot;,
+                &quot;prescription&quot;,
+                &quot;estimated_duration_seconds&quot;
+              ]
+            }
+          }
+        },
+        &quot;required&quot;: [
+          &quot;type&quot;,
+          &quot;items&quot;
+        ]
+      }
+    },
+    &quot;warnings&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;generation&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;algorithm_version&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;seed&quot;: {
+          &quot;type&quot;: &quot;integer&quot;
+        }
+      }
+    }
+  },
+  &quot;required&quot;: [
+    &quot;saved&quot;,
+    &quot;version&quot;,
+    &quot;goal&quot;,
+    &quot;workout_type&quot;,
+    &quot;status&quot;,
+    &quot;constraints&quot;,
+    &quot;planned_duration_seconds&quot;,
+    &quot;estimated_duration_seconds&quot;,
+    &quot;sections&quot;,
+    &quot;warnings&quot;,
+    &quot;generation&quot;
+  ]
+}</pre><h3 id="schema-ProgramGenerateRequest">ProgramGenerateRequest</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;goal&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;workout_type&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;strength&quot;,
+        &quot;cardio&quot;,
+        &quot;mobility&quot;,
+        &quot;mixed&quot;
+      ]
+    },
+    &quot;experience_level&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;beginner&quot;,
+        &quot;intermediate&quot;,
+        &quot;advanced&quot;
+      ]
+    },
+    &quot;weeks&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 1,
+      &quot;maximum&quot;: 12
+    },
+    &quot;days_per_week&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 1,
+      &quot;maximum&quot;: 7
+    },
+    &quot;start_date&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date&quot;
+    },
+    &quot;timezone&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;available_days&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;enum&quot;: [
+          &quot;monday&quot;,
+          &quot;tuesday&quot;,
+          &quot;wednesday&quot;,
+          &quot;thursday&quot;,
+          &quot;friday&quot;,
+          &quot;saturday&quot;,
+          &quot;sunday&quot;
+        ]
+      }
+    },
+    &quot;session_duration_minutes&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 5,
+      &quot;maximum&quot;: 180
+    },
+    &quot;environment&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;home&quot;,
+        &quot;gym&quot;,
+        &quot;indoor&quot;,
+        &quot;outdoor&quot;
+      ]
+    },
+    &quot;space&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;available_equipment&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;unavailable_equipment&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;preferred_activity_ids&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;gym_id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;excluded_exercise_ids&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;save&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;
+    },
+    &quot;seed&quot;: {
+      &quot;type&quot;: &quot;integer&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;goal&quot;,
+    &quot;experience_level&quot;,
+    &quot;weeks&quot;,
+    &quot;days_per_week&quot;,
+    &quot;start_date&quot;,
+    &quot;timezone&quot;,
+    &quot;available_days&quot;,
+    &quot;session_duration_minutes&quot;,
+    &quot;environment&quot;
+  ],
+  &quot;example&quot;: {
+    &quot;goal&quot;: &quot;endurance&quot;,
+    &quot;workout_type&quot;: &quot;cardio&quot;,
+    &quot;experience_level&quot;: &quot;beginner&quot;,
+    &quot;weeks&quot;: 4,
+    &quot;days_per_week&quot;: 3,
+    &quot;start_date&quot;: &quot;2026-12-01&quot;,
+    &quot;timezone&quot;: &quot;Asia/Jakarta&quot;,
+    &quot;available_days&quot;: [
+      &quot;monday&quot;,
+      &quot;wednesday&quot;,
+      &quot;saturday&quot;
+    ],
+    &quot;session_duration_minutes&quot;: 30,
+    &quot;environment&quot;: &quot;outdoor&quot;,
+    &quot;space&quot;: &quot;unrestricted&quot;,
+    &quot;seed&quot;: 42
+  }
+}</pre><h3 id="schema-Program">Program</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;id&quot;: {
+      &quot;type&quot;: [
+        &quot;string&quot;,
+        &quot;null&quot;
+      ]
+    },
+    &quot;saved&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;
+    },
+    &quot;version&quot;: {
+      &quot;type&quot;: &quot;integer&quot;
+    },
+    &quot;goal&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;weeks&quot;: {
+      &quot;type&quot;: &quot;integer&quot;
+    },
+    &quot;timezone&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;start_date&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date&quot;
+    },
+    &quot;schedule&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;date&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;format&quot;: &quot;date&quot;
+          },
+          &quot;week&quot;: {
+            &quot;type&quot;: &quot;integer&quot;
+          },
+          &quot;day&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;kind&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;focus&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;session&quot;: {
+            &quot;oneOf&quot;: [
+              {
+                &quot;$ref&quot;: &quot;#/components/schemas/WorkoutSession&quot;
+              },
+              {
+                &quot;type&quot;: &quot;null&quot;
+              }
+            ]
+          }
+        },
+        &quot;required&quot;: [
+          &quot;date&quot;,
+          &quot;week&quot;,
+          &quot;day&quot;,
+          &quot;kind&quot;,
+          &quot;session&quot;
+        ]
+      }
+    },
+    &quot;generation&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;algorithm_version&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;seed&quot;: {
+          &quot;type&quot;: &quot;integer&quot;
+        }
+      }
+    },
+    &quot;warnings&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    }
+  }
+}</pre><h3 id="schema-TokenRequest">TokenRequest</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;email&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;email&quot;
+    },
+    &quot;password&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;minLength&quot;: 12,
+      &quot;maxLength&quot;: 128
+    }
+  },
+  &quot;required&quot;: [
+    &quot;email&quot;,
+    &quot;password&quot;
+  ]
+}</pre><h3 id="schema-RefreshRequest">RefreshRequest</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;refresh_token&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;refresh_token&quot;
+  ]
+}</pre><h3 id="schema-TokenPair">TokenPair</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [
+    &quot;user&quot;,
+    &quot;access_token&quot;,
+    &quot;refresh_token&quot;,
+    &quot;token_type&quot;,
+    &quot;access_token_expires_at&quot;,
+    &quot;refresh_token_expires_at&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;user&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;email&quot;: {
+          &quot;type&quot;: &quot;string&quot;,
+          &quot;format&quot;: &quot;email&quot;
+        },
+        &quot;role&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;created_at&quot;: {
+          &quot;type&quot;: &quot;string&quot;,
+          &quot;format&quot;: &quot;date-time&quot;
+        }
+      }
+    },
+    &quot;access_token&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;refresh_token&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;token_type&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;example&quot;: &quot;Bearer&quot;
+    },
+    &quot;access_token_expires_at&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date-time&quot;
+    },
+    &quot;refresh_token_expires_at&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date-time&quot;
+    }
+  }
+}</pre><h3 id="schema-FitnessProfile">FitnessProfile</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [
+    &quot;goal&quot;,
+    &quot;experience_level&quot;,
+    &quot;preferred_activity_ids&quot;,
+    &quot;equipment&quot;,
+    &quot;environment&quot;,
+    &quot;space&quot;,
+    &quot;excluded_ids&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;goal&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;experience_level&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;preferred_activity_ids&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;equipment&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;environment&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;space&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;weight_kg&quot;: {
+      &quot;type&quot;: [
+        &quot;number&quot;,
+        &quot;null&quot;
+      ]
+    },
+    &quot;excluded_ids&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;updated_at&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date-time&quot;
+    }
+  }
+}</pre><h3 id="schema-GymSubmissionRequest">GymSubmissionRequest</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;gym_id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;submission_type&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;changes&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;additionalProperties&quot;: true
+    },
+    &quot;evidence&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    }
+  },
+  &quot;required&quot;: [
+    &quot;submission_type&quot;,
+    &quot;changes&quot;
+  ]
+}</pre><h3 id="schema-GymReviewRequest">GymReviewRequest</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;decision&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;approve&quot;,
+        &quot;reject&quot;
+      ]
+    },
+    &quot;reason&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;decision&quot;
+  ]
+}</pre><h3 id="schema-WorkoutUpdateRequest">WorkoutUpdateRequest</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;expected_version&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 1
+    },
+    &quot;status&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;planned&quot;,
+        &quot;cancelled&quot;
+      ]
+    }
+  },
+  &quot;required&quot;: [
+    &quot;expected_version&quot;,
+    &quot;status&quot;
+  ]
+}</pre><h3 id="schema-WorkoutAdaptRequest">WorkoutAdaptRequest</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;changes&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/ConstraintChanges&quot;
+    },
+    &quot;expected_version&quot;: {
+      &quot;type&quot;: &quot;integer&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;changes&quot;,
+    &quot;expected_version&quot;
+  ]
+}</pre><h3 id="schema-WorkoutReplaceRequest">WorkoutReplaceRequest</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;replacement_exercise_id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;expected_version&quot;: {
+      &quot;type&quot;: &quot;integer&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;replacement_exercise_id&quot;,
+    &quot;expected_version&quot;
+  ]
+}</pre><h3 id="schema-WorkoutCompletionRequest">WorkoutCompletionRequest</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [
+    &quot;status&quot;,
+    &quot;started_at&quot;,
+    &quot;finished_at&quot;,
+    &quot;items&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;status&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;completed&quot;,
+        &quot;partial&quot;
+      ]
+    },
+    &quot;started_at&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date-time&quot;
+    },
+    &quot;finished_at&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date-time&quot;
+    },
+    &quot;notes&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;items&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;item_id&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;exercise_id&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;performed_sets&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;type&quot;: &quot;object&quot;,
+              &quot;properties&quot;: {
+                &quot;reps&quot;: {
+                  &quot;type&quot;: &quot;integer&quot;
+                },
+                &quot;load_kg&quot;: {
+                  &quot;type&quot;: &quot;number&quot;
+                }
+              }
+            }
+          },
+          &quot;actual_duration_seconds&quot;: {
+            &quot;type&quot;: &quot;integer&quot;
+          },
+          &quot;actual_distance_km&quot;: {
+            &quot;type&quot;: &quot;number&quot;
+          },
+          &quot;perceived_effort&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;minimum&quot;: 1,
+            &quot;maximum&quot;: 10
+          }
+        },
+        &quot;required&quot;: [
+          &quot;item_id&quot;,
+          &quot;exercise_id&quot;
+        ]
+      }
+    }
+  }
+}</pre><h3 id="schema-ProgramAdaptRequest">ProgramAdaptRequest</h3><pre>{
+  &quot;$ref&quot;: &quot;#/components/schemas/WorkoutAdaptRequest&quot;
+}</pre><h3 id="schema-ProgramScheduleRequest">ProgramScheduleRequest</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;expected_version&quot;: {
+      &quot;type&quot;: &quot;integer&quot;
+    },
+    &quot;from_date&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date&quot;
+    },
+    &quot;to_date&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;expected_version&quot;,
+    &quot;from_date&quot;,
+    &quot;to_date&quot;
+  ]
+}</pre><h3 id="schema-WorkoutCaloriesRequest">WorkoutCaloriesRequest</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;weight_kg&quot;: {
+      &quot;type&quot;: &quot;number&quot;,
+      &quot;exclusiveMinimum&quot;: 0,
+      &quot;maximum&quot;: 500
+    },
+    &quot;estimate_type&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;gross&quot;,
+        &quot;net&quot;
+      ]
+    },
+    &quot;segments&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;minItems&quot;: 1,
+      &quot;maxItems&quot;: 100,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;activity_id&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;duration_minutes&quot;: {
+            &quot;type&quot;: &quot;number&quot;,
+            &quot;exclusiveMinimum&quot;: 0
+          },
+          &quot;intensity&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          }
+        },
+        &quot;required&quot;: [
+          &quot;activity_id&quot;,
+          &quot;duration_minutes&quot;
+        ]
+      }
+    }
+  },
+  &quot;required&quot;: [
+    &quot;segments&quot;
+  ]
+}</pre><h3 id="schema-GymAdminPatch">GymAdminPatch</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;minProperties&quot;: 1,
+  &quot;additionalProperties&quot;: false,
+  &quot;properties&quot;: {
+    &quot;name&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;minLength&quot;: 2,
+      &quot;maxLength&quot;: 160
+    },
+    &quot;address&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;street&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;city&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;region&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;country&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    },
+    &quot;latitude&quot;: {
+      &quot;type&quot;: &quot;number&quot;,
+      &quot;minimum&quot;: -90,
+      &quot;maximum&quot;: 90
+    },
+    &quot;longitude&quot;: {
+      &quot;type&quot;: &quot;number&quot;,
+      &quot;minimum&quot;: -180,
+      &quot;maximum&quot;: 180
+    }
+  }
+}</pre><h3 id="schema-Exercise">Exercise</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;name&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;description&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;category&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;movement_pattern&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;primary_muscles&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;secondary_muscles&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;required_equipment&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;difficulty&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;measurement_type&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;environments&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;minimum_space&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;instructions&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;cautions&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;active&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;id&quot;,
+    &quot;name&quot;,
+    &quot;category&quot;,
+    &quot;movement_pattern&quot;,
+    &quot;primary_muscles&quot;,
+    &quot;required_equipment&quot;,
+    &quot;difficulty&quot;,
+    &quot;measurement_type&quot;,
+    &quot;environments&quot;,
+    &quot;minimum_space&quot;,
+    &quot;instructions&quot;,
+    &quot;cautions&quot;,
+    &quot;active&quot;
+  ]
+}</pre><h3 id="schema-ExerciseSummary">ExerciseSummary</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;name&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;category&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;movement_pattern&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;primary_muscles&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;required_equipment&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;difficulty&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;measurement_type&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;environments&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;minimum_space&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    }
+  }
+}</pre><h3 id="schema-GymSummary">GymSummary</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;name&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;address&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;street&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;city&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;region&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;country&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    },
+    &quot;location&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;latitude&quot;: {
+          &quot;type&quot;: &quot;number&quot;
+        },
+        &quot;longitude&quot;: {
+          &quot;type&quot;: &quot;number&quot;
+        }
+      }
+    },
+    &quot;verification_status&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;source_type&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;distance_km&quot;: {
+      &quot;type&quot;: &quot;number&quot;
+    }
+  }
+}</pre><h3 id="schema-Gym">Gym</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;name&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;address&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;street&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;city&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;region&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;country&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    },
+    &quot;location&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;latitude&quot;: {
+          &quot;type&quot;: &quot;number&quot;
+        },
+        &quot;longitude&quot;: {
+          &quot;type&quot;: &quot;number&quot;
+        }
+      }
+    },
+    &quot;verification_status&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;source_type&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;distance_km&quot;: {
+      &quot;type&quot;: &quot;number&quot;
+    },
+    &quot;timezone&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;contact&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;additionalProperties&quot;: true
+    },
+    &quot;opening_hours&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;additionalProperties&quot;: true
+    },
+    &quot;price_info&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;additionalProperties&quot;: true
+    },
+    &quot;source_reference&quot;: {
+      &quot;type&quot;: [
+        &quot;string&quot;,
+        &quot;null&quot;
+      ]
+    },
+    &quot;verified_at&quot;: {
+      &quot;type&quot;: [
+        &quot;string&quot;,
+        &quot;null&quot;
+      ]
+    },
+    &quot;last_updated_at&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date-time&quot;
+    },
+    &quot;facilities&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;equipment&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;equipment_id&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;label&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;quantity&quot;: {
+            &quot;type&quot;: [
+              &quot;integer&quot;,
+              &quot;null&quot;
+            ]
+          },
+          &quot;status&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          },
+          &quot;verified_at&quot;: {
+            &quot;type&quot;: [
+              &quot;string&quot;,
+              &quot;null&quot;
+            ]
+          },
+          &quot;source_type&quot;: {
+            &quot;type&quot;: &quot;string&quot;
+          }
+        }
+      }
+    }
+  }
+}</pre><h3 id="schema-Equipment">Equipment</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;label&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;category&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;active&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;
+    }
+  }
+}</pre><h3 id="schema-Facility">Facility</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;label&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;category&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;verified_at&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;source_type&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    }
+  }
+}</pre><h3 id="schema-METProfile">METProfile</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;activity_id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;activity&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;intensity&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;modality&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;speed_min_kmh&quot;: {
+      &quot;type&quot;: &quot;number&quot;
+    },
+    &quot;speed_max_kmh&quot;: {
+      &quot;type&quot;: &quot;number&quot;
+    },
+    &quot;met&quot;: {
+      &quot;type&quot;: &quot;number&quot;
+    },
+    &quot;source&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;title&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;year&quot;: {
+          &quot;type&quot;: &quot;integer&quot;
+        },
+        &quot;activity_code&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;activity_description&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;url&quot;: {
+          &quot;type&quot;: &quot;string&quot;,
+          &quot;format&quot;: &quot;uri&quot;
+        }
+      }
+    }
+  }
+}</pre><h3 id="schema-CalorieEstimate">CalorieEstimate</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;activity&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;activity_id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;intensity&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;duration_minutes&quot;: {
+      &quot;type&quot;: &quot;number&quot;
+    },
+    &quot;weight_kg&quot;: {
+      &quot;type&quot;: &quot;number&quot;
+    },
+    &quot;met&quot;: {
+      &quot;type&quot;: &quot;number&quot;
+    },
+    &quot;estimated_kcal&quot;: {
+      &quot;type&quot;: &quot;number&quot;
+    },
+    &quot;estimate_type&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;method&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;source&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/METProfile&quot;
+    },
+    &quot;limitations&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    }
+  }
+}</pre><h3 id="schema-User">User</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;email&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;email&quot;
+    },
+    &quot;role&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;created_at&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date-time&quot;
+    }
+  }
+}</pre><h3 id="schema-WorkoutLog">WorkoutLog</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;session_id&quot;: {
+      &quot;type&quot;: [
+        &quot;string&quot;,
+        &quot;null&quot;
+      ]
+    },
+    &quot;status&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;started_at&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;finished_at&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;notes&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;items&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;created_at&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    }
+  }
+}</pre><h3 id="schema-AdaptResult">AdaptResult</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;original_summary&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;id&quot;: {
+          &quot;type&quot;: [
+            &quot;string&quot;,
+            &quot;null&quot;
+          ]
+        },
+        &quot;status&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;workout_type&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        },
+        &quot;estimated_duration_seconds&quot;: {
+          &quot;type&quot;: &quot;integer&quot;
+        }
+      }
+    },
+    &quot;adapted_workout&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/WorkoutSession&quot;
+    },
+    &quot;changes_applied&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;replaced_items&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;warnings&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    }
+  }
+}</pre><h3 id="schema-PaginatedMeta">PaginatedMeta</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;request_id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;pagination&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;limit&quot;: {
+          &quot;type&quot;: &quot;integer&quot;
+        },
+        &quot;offset&quot;: {
+          &quot;type&quot;: &quot;integer&quot;
+        },
+        &quot;total&quot;: {
+          &quot;type&quot;: &quot;integer&quot;
+        },
+        &quot;has_more&quot;: {
+          &quot;type&quot;: &quot;boolean&quot;
+        }
+      }
+    }
+  },
+  &quot;required&quot;: [
+    &quot;request_id&quot;,
+    &quot;pagination&quot;
+  ]
+}</pre><h3 id="schema-PaginatedResponse">PaginatedResponse</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;data&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {}
+    },
+    &quot;meta&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/PaginatedMeta&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;data&quot;,
+    &quot;meta&quot;
+  ]
+}</pre><h3 id="schema-EnvelopeWorkoutSession">EnvelopeWorkoutSession</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;data&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/WorkoutSession&quot;
+    },
+    &quot;meta&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;request_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    }
+  },
+  &quot;required&quot;: [
+    &quot;data&quot;,
+    &quot;meta&quot;
+  ]
+}</pre><h3 id="schema-EnvelopeProgram">EnvelopeProgram</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;data&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/Program&quot;
+    },
+    &quot;meta&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;request_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    }
+  },
+  &quot;required&quot;: [
+    &quot;data&quot;,
+    &quot;meta&quot;
+  ]
+}</pre><h3 id="schema-EnvelopeExercise">EnvelopeExercise</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;data&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/Exercise&quot;
+    },
+    &quot;meta&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;request_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    }
+  },
+  &quot;required&quot;: [
+    &quot;data&quot;,
+    &quot;meta&quot;
+  ]
+}</pre><h3 id="schema-EnvelopeGym">EnvelopeGym</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;data&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/Gym&quot;
+    },
+    &quot;meta&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;request_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    }
+  },
+  &quot;required&quot;: [
+    &quot;data&quot;,
+    &quot;meta&quot;
+  ]
+}</pre><h3 id="schema-EnvelopeCalorieEstimate">EnvelopeCalorieEstimate</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;data&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/CalorieEstimate&quot;
+    },
+    &quot;meta&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;request_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    }
+  },
+  &quot;required&quot;: [
+    &quot;data&quot;,
+    &quot;meta&quot;
+  ]
+}</pre><h3 id="schema-EnvelopeAdaptResult">EnvelopeAdaptResult</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;data&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/AdaptResult&quot;
+    },
+    &quot;meta&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;request_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    }
+  },
+  &quot;required&quot;: [
+    &quot;data&quot;,
+    &quot;meta&quot;
+  ]
+}</pre><h3 id="schema-EnvelopeUser">EnvelopeUser</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;data&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/User&quot;
+    },
+    &quot;meta&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;request_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    }
+  },
+  &quot;required&quot;: [
+    &quot;data&quot;,
+    &quot;meta&quot;
+  ]
+}</pre><h3 id="schema-EnvelopeWorkoutLog">EnvelopeWorkoutLog</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;data&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/WorkoutLog&quot;
+    },
+    &quot;meta&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;request_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    }
+  },
+  &quot;required&quot;: [
+    &quot;data&quot;,
+    &quot;meta&quot;
+  ]
+}</pre><h3 id="schema-EnvelopeTokenPair">EnvelopeTokenPair</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [
+    &quot;data&quot;,
+    &quot;meta&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;data&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/TokenPair&quot;
+    },
+    &quot;meta&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [
+        &quot;request_id&quot;
+      ],
+      &quot;properties&quot;: {
+        &quot;request_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    }
+  }
+}</pre><h3 id="schema-EnvelopeFitnessProfile">EnvelopeFitnessProfile</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [
+    &quot;data&quot;,
+    &quot;meta&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;data&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/FitnessProfile&quot;
+    },
+    &quot;meta&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;required&quot;: [
+        &quot;request_id&quot;
+      ],
+      &quot;properties&quot;: {
+        &quot;request_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    }
+  }
+}</pre><h3 id="schema-HealthStatus">HealthStatus</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [
+    &quot;status&quot;,
+    &quot;service&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;status&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;ok&quot;,
+        &quot;ready&quot;,
+        &quot;not_ready&quot;
+      ]
+    },
+    &quot;service&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;example&quot;: &quot;ambatumove-core&quot;
+    }
+  }
+}</pre><h3 id="schema-CalorieRecommendation">CalorieRecommendation</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [
+    &quot;exercise_id&quot;,
+    &quot;name&quot;,
+    &quot;category&quot;,
+    &quot;intensity&quot;,
+    &quot;met&quot;,
+    &quot;required_duration_minutes&quot;,
+    &quot;recommended_duration_minutes&quot;,
+    &quot;estimated_kcal&quot;,
+    &quot;meets_target&quot;,
+    &quot;fits_constraints&quot;,
+    &quot;required_equipment&quot;,
+    &quot;reason&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;exercise_id&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;name&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;category&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;cardio&quot;,
+        &quot;strength&quot;,
+        &quot;mobility&quot;
+      ]
+    },
+    &quot;intensity&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;met&quot;: {
+      &quot;type&quot;: &quot;number&quot;,
+      &quot;exclusiveMinimum&quot;: 0
+    },
+    &quot;required_duration_minutes&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 1
+    },
+    &quot;recommended_duration_minutes&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 1
+    },
+    &quot;estimated_kcal&quot;: {
+      &quot;type&quot;: &quot;number&quot;,
+      &quot;minimum&quot;: 0
+    },
+    &quot;meets_target&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;
+    },
+    &quot;fits_constraints&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;
+    },
+    &quot;required_equipment&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    },
+    &quot;reason&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    }
+  }
+}</pre><h3 id="schema-CalorieRecommendationResult">CalorieRecommendationResult</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [
+    &quot;target_kcal&quot;,
+    &quot;weight_kg&quot;,
+    &quot;max_duration_minutes&quot;,
+    &quot;target_achievable&quot;,
+    &quot;recommendations&quot;,
+    &quot;method&quot;,
+    &quot;estimate_type&quot;,
+    &quot;disclaimer&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;target_kcal&quot;: {
+      &quot;type&quot;: &quot;number&quot;,
+      &quot;exclusiveMinimum&quot;: 0
+    },
+    &quot;weight_kg&quot;: {
+      &quot;type&quot;: &quot;number&quot;,
+      &quot;minimum&quot;: 20,
+      &quot;maximum&quot;: 300
+    },
+    &quot;max_duration_minutes&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;minimum&quot;: 1
+    },
+    &quot;target_achievable&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;
+    },
+    &quot;reason&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    },
+    &quot;recommendations&quot;: {
+      &quot;type&quot;: &quot;array&quot;,
+      &quot;items&quot;: {
+        &quot;$ref&quot;: &quot;#/components/schemas/CalorieRecommendation&quot;
+      }
+    },
+    &quot;method&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;example&quot;: &quot;MET&quot;
+    },
+    &quot;estimate_type&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;example&quot;: &quot;gross&quot;
+    },
+    &quot;disclaimer&quot;: {
+      &quot;type&quot;: &quot;string&quot;
+    }
+  }
+}</pre><h3 id="schema-EnvelopeCalorieRecommendationResult">EnvelopeCalorieRecommendationResult</h3><pre>{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [
+    &quot;data&quot;,
+    &quot;meta&quot;
+  ],
+  &quot;properties&quot;: {
+    &quot;data&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/CalorieRecommendationResult&quot;
+    },
+    &quot;meta&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;request_id&quot;: {
+          &quot;type&quot;: &quot;string&quot;
+        }
+      }
+    }
+  }
+}</pre></body></html>

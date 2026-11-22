@@ -1,53 +1,100 @@
-# AmbatuMove Core
+# AmbatuMove
 
-Single Go HTTP service with SQLite persistence, embedded forward migrations, and maintainable exercise/equipment/facility/MET and gym reference data.
+[English](README.en.md) | [PDF](README.pdf) | [Referensi API (PDF)](docs/api-reference.pdf) | [HTML](docs/api-reference.html)
 
-## Local development
+- API: https://nizdri.stei.fun/api/v1
+- Swagger UI: https://nizdri.stei.fun/docs
+- OpenAPI: [YAML](docs/openapi.yaml) / [JSON](docs/openapi.json) / [live](https://nizdri.stei.fun/openapi.json)
+- Release: [v0.1.8](https://github.com/Nizreal/AmbatuMove/releases/tag/v0.1.8)
 
-Requires Go 1.27.x. Copy `.env.example` to `.env` and set `DATABASE_PATH`; export its values in your shell (the binary does not load dotenv files). In production, set `JWT_SIGNING_KEY` to a base64-encoded random value with at least 32 decoded bytes. Use a persistent secret across restarts. Start with `go run ./cmd/server serve`; routes are under `/api/v1`, and `/health`, `/ready`, `/openapi.json`, and `/docs` are at the root.
+AmbatuMove merupakan microservice untuk tugas besar TST dan PWAM bertema Health & Wellbeing. Layanan ini menyusun latihan berdasarkan durasi, tingkat pengalaman, peralatan, lokasi, dan target pengguna. Pengguna dapat menyimpan rencana latihan, mencatat aktivitas, serta melihat riwayat latihan. Kelompok lain dapat menggunakan katalog latihan, direktori gym, estimasi kalori, dan pratinjau rencana latihan melalui API.
 
-The service migrates and initializes missing exercise, equipment, muscle-group, facility, and MET reference rows on startup. Seeders are insert-only, so administrator imports and edits survive restarts. Synthetic gyms are excluded by default; enable them only in development or tests with `APP_ENV=development` (or `test`) and `SEED_SYNTHETIC_GYMS=true`. Production configuration rejects this option. Existing synthetic rows are deactivated, not deleted, preserving references and historical data. `go run ./cmd/server migrate` applies migrations, `seed` initializes the references, and `healthcheck` probes local liveness. The local database directory is created automatically.
+## Arsitektur dan deployment
 
-### Reference data administration
-
-The existing binary includes transactional JSON import/export commands; no API process restart or binary rebuild is needed after an import. Back up the SQLite database first, run `--dry-run`, and then apply the same file:
-
-```sh
-go run ./cmd/server admin gym import --file data/gyms.json --dry-run
-go run ./cmd/server admin gym import --file data/gyms.json
-go run ./cmd/server admin exercise export --file data/exercises.json
-go run ./cmd/server admin equipment export --file data/equipment.json
-go run ./cmd/server admin facility export --file data/facilities.json
-go run ./cmd/server admin met export --file data/met.json
+```text
+Mobile app / partner service
+    | HTTPS
+Cloudflare Tunnel (host)
+    | localhost:18081
+Nginx gateway (8080)
+    | core-service:8080
+Go core -> SQLite (/data/ambatumove.sqlite)
 ```
 
-The same `import --file PATH [--dry-run]` and `export --file PATH` forms are available for `gym`, `exercise`, `equipment`, `facility`, and `met`. Imports strictly validate the complete JSON array, duplicate IDs, enumeration values, and cross-record references before a transaction writes anything. An import updates the IDs in its file and leaves omitted records untouched. Exports use stable IDs and can be edited and reimported. Cache revisions are stored in SQLite, so running backend instances discard stale gym/catalog cache entries after an external CLI import. The curated Bandung directory is `backend/data/gyms.json` (9 records, currently marked unverified); prospective records in `docs/ambatumove-gyms-survey-queue-v2.json`, including FIT HUB Merdeka, are not included and must not be imported until verified.
+Backend menggunakan Go dan SQLite. Nginx dan backend berjalan dalam dua container Docker pada STB ARM64. Cloudflare Tunnel berjalan pada host. Aplikasi mobile dan integrasi antarkelompok berjalan di luar STB.
 
-```sh
-go run ./cmd/server admin exercise import --file data/exercises.json --dry-run
-go run ./cmd/server admin equipment import --file data/equipment.json --dry-run
-go run ./cmd/server admin facility import --file data/facilities.json --dry-run
-go run ./cmd/server admin met import --file data/met.json --dry-run
-go run ./cmd/server admin gym export --file data/gyms-export.json
+| Container | Batas CPU | Batas RAM | RAM saat idle |
+|---|---:|---:|---:|
+| Backend | 0,50 | 256 MiB | 8,621 MiB |
+| Nginx | 0,25 | 64 MiB | 7,984 MiB |
+
+Pengukuran 22 November 2026 dilakukan pada STB fisik setelah deployment. Port produksi adalah **18081**, mengikuti konfigurasi tunnel yang sudah ada. Data disimpan di `/mnt/storage/ambatumove`, sedangkan release dan konfigurasi deployment berada di `/mnt/storage/ambatumove-deployment`.
+
+## Akses API
+
+Endpoint publik dapat diakses tanpa akun. Kelompok mitra dapat meminta API key secara pribadi kepada tim AmbatuMove. Gunakan header `X-API-Key` untuk akses mitra. Registrasi dan login pengguna menggunakan email dan kata sandi; akses data pribadi menggunakan `Authorization: Bearer <token>`. JWT admin diperlukan untuk moderasi.
+
+| Scope | API |
+|---|---|
+| `catalog:read` | Latihan, peralatan, kelompok otot, kategori |
+| `gyms:read` | Gym, peralatan, fasilitas |
+| `calories:estimate` | Estimasi dan rekomendasi kalori |
+| `planner:preview` | Pratinjau latihan/program, alternatif |
+
+Batas bawaan: 60 request/menit per klien atau pengguna per kelompok rute, 120 untuk API key mitra, dan 5 untuk rute autentikasi. Gunakan timeout, cache untuk data referensi, dan backoff saat menerima HTTP 429. Simpan API key di server mitra; hindari menyertakannya di APK atau repository publik. Gunakan data uji sintetis.
+
+## Contoh penggunaan
+
+```bash
+BASE=https://nizdri.stei.fun
+curl -fsS "$BASE/health"
+curl -fsS "$BASE/api/v1/gyms"
+curl -fsS "$BASE/api/v1/calories/estimate?activity=walking&intensity=moderate&duration_minutes=15&weight_kg=70"
+curl -fsS "$BASE/api/v1/calories/recommendations?target_kcal=200&weight_kg=70&max_duration_minutes=45"
 ```
 
-The bounded reference and gym caches are enabled by default. Set `REFERENCE_CACHE_ENABLED=false` or `GYM_CACHE_ENABLED=false` to run cache-bypassed comparisons; the SQL-backed results are unchanged.
-
-`GET /api/v1/calories/recommendations?target_kcal=250&weight_kg=70&max_duration_minutes=45&category=cardio` returns deterministic, constraint-aware activity options from the seeded MET catalog. Repeat `available_equipment`, `excluded_equipment`, and `excluded_exercise_ids` for multiple IDs; pass `gym_id` to use that gym's verified inventory. Without a gym or explicit equipment IDs, only bodyweight/no-required-equipment activities are eligible. Defaults are 180 minutes, beginner experience, moderate maximum intensity, gross MET estimation, and up to eight results. The endpoint is stateless and public; consumers may also use a partner key scoped for `calories:estimate`. When a target cannot be reached within the time cap, the result includes partial alternatives or an explanation with an empty list. See [`../docs/openapi.yaml`](../docs/openapi.yaml) for complete query and response schemas.
-
-Create partner keys with `go run ./cmd/server admin partner-key create --group <name> --scopes catalog:read,gyms:read,calories:estimate,planner:preview`. The generated secret is printed once. List metadata with `admin partner-key list`, rotate with `admin partner-key rotate --id <id>`, and revoke with `admin partner-key revoke --id <id>`. Bootstrap an administrator by securely piping a password to `go run ./cmd/server admin user create-admin --email <email> --password-stdin`. No admin or partner key is provisioned by default.
-
-Create an online backup with `go run ./cmd/server backup --output <new-file>` and verify it with `go run ./cmd/server verify-backup --path <file>`. Protect backup files as user data. Set `GOMEMLIMIT=180MiB` for the constrained deployment profile; this is a runtime target, not a hard process memory cap.
-
-The `go run ./cmd/server schema-version` operational command prints the current database migration version without applying migrations. The STB deployment script uses it to decide whether it can safely roll the application image back after a failed activation; it never automatically restores database contents.
-
-## Checks
-
-```sh
-gofmt -w ./cmd ./internal ./migrations
-go vet ./...
-go test ./...
-CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -o /tmp/ambatumove-server ./cmd/server
+```bash
+curl -fsS -X POST "$BASE/api/v1/workouts/generate" \
+  -H 'Content-Type: application/json' \
+  -d '{"goal":"endurance","workout_type":"cardio",
+       "duration_minutes":30,"experience_level":"beginner",
+       "environment":"outdoor","space":"unrestricted",
+       "available_equipment":["bodyweight"],
+       "preferred_activity_ids":["act_walk_outdoor"],"save":false,"seed":42}'
 ```
 
-Build the ARM64-compatible container with `docker buildx build --platform linux/arm64 -t ambatumove-core:local .` from this directory. Docker must be installed separately.
+
+Contoh akses mitra:
+
+```bash
+curl -fsS "$BASE/api/v1/gyms" -H "X-API-Key: $PARTNER_KEY"
+```
+
+Pratinjau latihan tidak disimpan. Untuk menyimpan rencana, gunakan JWT dan `save: true`. Respons bisnis umumnya memiliki `data` dan `meta.request_id`; respons daftar dapat menyertakan `meta.pagination`. Gunakan kontrak OpenAPI untuk parameter dan skema lengkap.
+
+## Data awal dan hasil pengujian
+
+Sebanyak 53 latihan, 16 jenis peralatan, 12 kelompok otot, dan 9 gym di Bandung tersedia pada saat pengujian. Data gym berasal dari sumber yang dicatat dan masih berstatus `unverified`. Inventaris yang belum diketahui dibiarkan kosong. Estimasi kalori menggunakan MET dan dapat berbeda dari pengeluaran energi aktual.
+
+Health, readiness, katalog, direktori gym, estimasi kalori, rekomendasi kalori, dan pratinjau latihan telah diuji melalui domain publik. Pengujian sesi pengguna, izin API key, latihan tersimpan, program, pencatatan aktivitas, beban, dan persistensi setelah restart masih perlu dilakukan. Lihat [hasil pengujian](docs/production-verification.md) dan [PDF](docs/production-verification.pdf).
+
+## Pengembangan dan pemeliharaan
+
+- [Panduan backend](backend/README.md) ([English](backend/README.en.md)) untuk konfigurasi lokal dan administrasi.
+- [Runbook STB](docs/performance/AmbatuMove_STB_Deployment_and_Operations_Runbook_v1.1.md) untuk deployment dan pemulihan. Gunakan port produksi 18081 jika contoh dalam runbook memakai 18080.
+- `scripts/release.ps1` atau `scripts/release.sh` membangun binary ARM64 di laptop. Publikasikan tag dan release baru untuk perubahan kode, lalu jalankan `bash deploy/deploy-release.sh deploy VERSION` pada checkout yang sesuai di STB.
+- Data gym, latihan, peralatan, fasilitas, dan MET dapat diekspor atau diimpor melalui CLI. Buat backup terverifikasi dan jalankan dry-run sebelum impor. Cache diperbarui melalui revisi di SQLite.
+
+## Uji API
+
+```bash
+python scripts/smoke-test.py --base https://nizdri.stei.fun
+```
+
+Jalankan pengukuran lokal di STB:
+
+```bash
+python scripts/smoke-test.py --base http://127.0.0.1:18081 --benchmark
+```
+
+Script ini belum dijalankan pada deployment produksi. Opsi `--partner` menguji key dengan seluruh scope; `--demo-email` digunakan untuk akun sintetis. Opsi `--register-demo` dan `--write-demo-workout` membuat data uji. Detail penggunaan tersedia melalui `--help`.
