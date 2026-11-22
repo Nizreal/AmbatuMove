@@ -39,7 +39,7 @@ func newFixture(tb testing.TB) *fixture {
 	}
 	catalogService := catalog.NewService(db)
 	gymService := gyms.NewService(db)
-	if err = gymService.Seed(context.Background()); err != nil {
+	if err = gymService.SeedSyntheticFixtures(context.Background()); err != nil {
 		tb.Fatal(err)
 	}
 	calorieService := calories.NewService(db, catalogService, gymService)

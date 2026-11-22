@@ -433,7 +433,7 @@ func scanProfile(rows *sql.Rows) (METProfile, error) {
 func (s *Service) Seed(ctx context.Context) error {
 	query := `INSERT INTO activity_met_profiles
 		(id,activity_id,intensity_code,modality,speed_min_kmh,speed_max_kmh,met_value,compendium_year,compendium_code,activity_description,source_url)
-		VALUES(?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET activity_id=excluded.activity_id,intensity_code=excluded.intensity_code,modality=excluded.modality,speed_min_kmh=excluded.speed_min_kmh,speed_max_kmh=excluded.speed_max_kmh,met_value=excluded.met_value,compendium_year=excluded.compendium_year,compendium_code=excluded.compendium_code,activity_description=excluded.activity_description,source_url=excluded.source_url`
+		VALUES(?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO NOTHING ON CONFLICT(activity_id,intensity_code,modality) DO NOTHING`
 	values := metSeedValues()
 	for start := 0; start < len(values); start += 11 {
 		if _, err := s.db.ExecContext(ctx, query, values[start:start+11]...); err != nil {

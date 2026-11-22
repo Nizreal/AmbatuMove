@@ -22,6 +22,15 @@ func NewService(db *sql.DB) *Service { return &Service{db: db, cache: newReferen
 
 func (s *Service) CacheStats() CacheStats       { return s.cache.stats() }
 func (s *Service) SetCacheEnabled(enabled bool) { s.cache.setEnabled(enabled) }
+func (s *Service) InvalidateCache()             { s.cache.invalidate() }
+func (s *Service) refreshCacheRevision(ctx context.Context) error {
+	var revision int64
+	if err := s.db.QueryRowContext(ctx, "SELECT revision FROM reference_data_revision WHERE id=1").Scan(&revision); err != nil {
+		return err
+	}
+	s.cache.setRevision(revision)
+	return nil
+}
 func (s *Service) Warm(ctx context.Context) error {
 	if _, err := s.ListExercises(ctx, Filters{Limit: 100}); err != nil {
 		return err
@@ -34,6 +43,9 @@ func (s *Service) Warm(ctx context.Context) error {
 }
 
 func (s *Service) ListEquipment(ctx context.Context, category string) ([]Equipment, error) {
+	if err := s.refreshCacheRevision(ctx); err != nil {
+		return nil, err
+	}
 	key := "equipment:" + category
 	var cached []Equipment
 	if s.cache.get(key, &cached) {
@@ -69,6 +81,9 @@ func (s *Service) ListEquipment(ctx context.Context, category string) ([]Equipme
 }
 
 func (s *Service) ListMuscles(ctx context.Context) ([]map[string]string, error) {
+	if err := s.refreshCacheRevision(ctx); err != nil {
+		return nil, err
+	}
 	var cached []map[string]string
 	if s.cache.get("muscles", &cached) {
 		return cached, nil
@@ -114,6 +129,9 @@ func (s *Service) listExercises(ctx context.Context, filter Filters, boundedPubl
 	}
 	if (boundedPublicOffset && filter.Offset > 1000000) || len(filter.Query) > 120 || len(filter.Equipment) > 20 || len(filter.MuscleGroup) > 80 {
 		return Page{}, ErrInvalidFilter
+	}
+	if err := s.refreshCacheRevision(ctx); err != nil {
+		return Page{}, err
 	}
 	for _, id := range filter.Equipment {
 		if len(id) > 80 {
@@ -205,6 +223,9 @@ func (s *Service) AllExercises(ctx context.Context) ([]ExerciseSummary, error) {
 }
 
 func (s *Service) GetExercise(ctx context.Context, id string) (Exercise, error) {
+	if err := s.refreshCacheRevision(ctx); err != nil {
+		return Exercise{}, err
+	}
 	var cached Exercise
 	if s.cache.get("exercise:"+id, &cached) {
 		return cached, nil

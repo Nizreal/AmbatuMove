@@ -28,7 +28,7 @@ func newCalorieService(t *testing.T) *Service {
 	}
 	catalogService := catalog.NewService(db)
 	gymService := gyms.NewService(db)
-	if err := gymService.Seed(context.Background()); err != nil {
+	if err := gymService.SeedSyntheticFixtures(context.Background()); err != nil {
 		t.Fatal(err)
 	}
 	service := NewService(db, catalogService, gymService)
@@ -70,6 +70,25 @@ func TestRecommendReturnsConstraintAwareWalkingRunningAndCycling(t *testing.T) {
 	}
 	if result.Method != "MET" || result.EstimateType != "gross" {
 		t.Fatalf("unexpected estimate semantics: %+v", result)
+	}
+}
+
+func TestMETSeederPreservesAdministratorValues(t *testing.T) {
+	service := newCalorieService(t)
+	ctx := context.Background()
+	if _, err := service.db.ExecContext(ctx, `UPDATE activity_met_profiles SET met_value=3.14,activity_description='admin verified value' WHERE id='met_walk_out_moderate'`); err != nil {
+		t.Fatal(err)
+	}
+	if err := service.Seed(ctx); err != nil {
+		t.Fatal(err)
+	}
+	var met float64
+	var description string
+	if err := service.db.QueryRowContext(ctx, `SELECT met_value,activity_description FROM activity_met_profiles WHERE id='met_walk_out_moderate'`).Scan(&met, &description); err != nil {
+		t.Fatal(err)
+	}
+	if met != 3.14 || description != "admin verified value" {
+		t.Fatalf("administrator MET edit overwritten: met=%v description=%q", met, description)
 	}
 }
 

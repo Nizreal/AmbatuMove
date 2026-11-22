@@ -23,6 +23,7 @@ type gymReadCache struct {
 	entries                                           map[string]*list.Element
 	lru                                               *list.List
 	size                                              int
+	revision                                          int64
 	enabled                                           bool
 	hits, misses, evictions, invalidations, fallbacks uint64
 }
@@ -37,7 +38,7 @@ type CacheStats struct {
 }
 
 func newGymReadCache() *gymReadCache {
-	return &gymReadCache{entries: map[string]*list.Element{}, lru: list.New(), enabled: true}
+	return &gymReadCache{entries: map[string]*list.Element{}, lru: list.New(), enabled: true, revision: -1}
 }
 func (c *gymReadCache) get(key string, dest any) bool {
 	c.mu.Lock()
@@ -108,6 +109,18 @@ func (c *gymReadCache) invalidate() {
 	c.entries = map[string]*list.Element{}
 	c.lru.Init()
 	c.size = 0
+	c.revision = -1
+}
+func (c *gymReadCache) setRevision(revision int64) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.revision == revision {
+		return
+	}
+	c.entries = map[string]*list.Element{}
+	c.lru.Init()
+	c.size = 0
+	c.revision = revision
 }
 func (c *gymReadCache) stats() CacheStats {
 	c.mu.Lock()

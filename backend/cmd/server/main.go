@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -15,8 +16,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ambatumove/core/internal/admindata"
 	"github.com/ambatumove/core/internal/app"
+	"github.com/ambatumove/core/internal/catalog"
 	"github.com/ambatumove/core/internal/config"
+	"github.com/ambatumove/core/internal/gyms"
 	"github.com/ambatumove/core/internal/identity"
 	"github.com/ambatumove/core/internal/storage"
 	"github.com/ambatumove/core/migrations"
@@ -54,7 +58,11 @@ func run(args []string) error {
 			return err
 		}
 		defer application.Close()
-		fmt.Println("reference catalog, synthetic gyms, and MET data seeded")
+		if cfg.SeedSyntheticGyms {
+			fmt.Println("reference catalog and MET data initialized; opt-in synthetic gyms seeded")
+		} else {
+			fmt.Println("reference catalog, facilities, and MET data initialized; synthetic gyms disabled")
+		}
 		return nil
 	case "backup":
 		return backup(cfg, args[1:])
@@ -147,8 +155,8 @@ func verifyBackup(args []string) error {
 	return nil
 }
 func admin(cfg config.Config, args []string) error {
-	if len(args) < 2 || args[0] != "partner-key" && args[0] != "user" {
-		return fmt.Errorf("admin supports partner-key create|list|rotate|revoke and user create-admin")
+	if len(args) < 2 {
+		return fmt.Errorf("admin supports gym|exercise|equipment|facility|met import|export, partner-key create|list|rotate|revoke and user create-admin")
 	}
 	ctx := context.Background()
 	db, err := storage.OpenSQLite(ctx, cfg.DatabasePath)
@@ -158,6 +166,9 @@ func admin(cfg config.Config, args []string) error {
 	defer db.Close()
 	if err = storage.ApplyMigrations(ctx, db, migrations.FS); err != nil {
 		return err
+	}
+	if kind, ok := admindata.ParseKind(args[0]); ok {
+		return adminReferenceData(ctx, db, kind, args[1:])
 	}
 	service, err := identity.NewService(db, cfg.JWTSigningKey, cfg.JWTIssuer, cfg.JWTAudience)
 	if err != nil {
@@ -243,6 +254,68 @@ func admin(cfg config.Config, args []string) error {
 	default:
 		return fmt.Errorf("unsupported admin operation")
 	}
+}
+
+func adminReferenceData(ctx context.Context, db *sql.DB, kind admindata.Kind, args []string) error {
+	if len(args) == 0 || (args[0] != "import" && args[0] != "export") {
+		return fmt.Errorf("admin %s supports import|export --file PATH", kind)
+	}
+	operation := args[0]
+	flags := flag.NewFlagSet("admin "+string(kind)+" "+operation, flag.ContinueOnError)
+	filePath := flags.String("file", "", "JSON dataset path")
+	dryRun := false
+	if operation == "import" {
+		flags.BoolVar(&dryRun, "dry-run", false, "validate without writing changes")
+	}
+	if err := flags.Parse(args[1:]); err != nil {
+		return err
+	}
+	if flags.NArg() != 0 {
+		return fmt.Errorf("unexpected arguments: %s", strings.Join(flags.Args(), " "))
+	}
+	if strings.TrimSpace(*filePath) == "" {
+		return fmt.Errorf("admin %s %s requires --file", kind, operation)
+	}
+	catalogService := catalog.NewService(db)
+	gymService := gyms.NewService(db)
+	service := admindata.New(db, catalogService, gymService)
+	if operation == "import" {
+		input, err := os.Open(*filePath)
+		if err != nil {
+			return fmt.Errorf("open import file: %w", err)
+		}
+		result, importErr := service.Import(ctx, kind, input, dryRun)
+		closeErr := input.Close()
+		if importErr != nil {
+			return importErr
+		}
+		if closeErr != nil {
+			return closeErr
+		}
+		if result.DryRun {
+			fmt.Printf("validated %d %s records; no changes written\n", result.Count, result.Kind)
+		} else {
+			fmt.Printf("imported %d %s records\n", result.Count, result.Kind)
+		}
+		return nil
+	}
+	output, err := os.OpenFile(*filePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
+	if err != nil {
+		return fmt.Errorf("open export file: %w", err)
+	}
+	if err = service.Export(ctx, kind, output); err != nil {
+		_ = output.Close()
+		return err
+	}
+	if err = output.Sync(); err != nil {
+		_ = output.Close()
+		return err
+	}
+	if err = output.Close(); err != nil {
+		return err
+	}
+	fmt.Printf("exported %s records to %s\n", kind, *filePath)
+	return nil
 }
 
 func parseLogLevel(level string) slog.Level {

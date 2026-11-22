@@ -35,7 +35,7 @@ func newPlannerFixture(t *testing.T) (*Service, *gyms.Service, *sql.DB) {
 		t.Fatal(err)
 	}
 	gymService := gyms.NewService(db)
-	if err := gymService.Seed(context.Background()); err != nil {
+	if err := gymService.SeedSyntheticFixtures(context.Background()); err != nil {
 		t.Fatal(err)
 	}
 	return NewService(catalog.NewService(db), gymService), gymService, db

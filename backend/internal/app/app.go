@@ -43,6 +43,10 @@ func New(ctx context.Context, cfg config.Config, logger *slog.Logger) (*Applicat
 		_ = db.Close()
 		return nil, fmt.Errorf("seed reference catalog: %w", err)
 	}
+	if err := gyms.SeedFacilities(ctx, db); err != nil {
+		_ = db.Close()
+		return nil, fmt.Errorf("seed facility vocabulary: %w", err)
+	}
 	catalogService := catalog.NewService(db)
 	catalogService.SetCacheEnabled(cfg.ReferenceCacheEnabled)
 	if err := catalogService.Warm(ctx); err != nil && logger != nil {
@@ -50,9 +54,14 @@ func New(ctx context.Context, cfg config.Config, logger *slog.Logger) (*Applicat
 	}
 	gymService := gyms.NewService(db)
 	gymService.SetCacheEnabled(cfg.GymCacheEnabled)
-	if err := gymService.Seed(ctx); err != nil {
+	if cfg.SeedSyntheticGyms {
+		if err := gymService.SeedSyntheticFixtures(ctx); err != nil {
+			_ = db.Close()
+			return nil, fmt.Errorf("seed synthetic gym directory: %w", err)
+		}
+	} else if err := gymService.DeactivateSynthetic(ctx); err != nil {
 		_ = db.Close()
-		return nil, fmt.Errorf("seed synthetic gym directory: %w", err)
+		return nil, fmt.Errorf("deactivate synthetic gym fixtures: %w", err)
 	}
 	calorieService := calories.NewService(db, catalogService, gymService)
 	if err := calorieService.Seed(ctx); err != nil {

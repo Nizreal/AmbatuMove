@@ -24,7 +24,7 @@ func TestGymSubmissionReviewAppliesAtomicallyAndAudits(t *testing.T) {
 		t.Fatal(err)
 	}
 	service := NewService(db)
-	if err = service.Seed(ctx); err != nil {
+	if err = service.SeedSyntheticFixtures(ctx); err != nil {
 		t.Fatal(err)
 	}
 	for _, user := range []string{"u1", "admin1"} {
@@ -79,7 +79,7 @@ func TestNewGymSubmissionPublishesUnverifiedGymOnApproval(t *testing.T) {
 		t.Fatal(err)
 	}
 	service := NewService(db)
-	if err = service.Seed(ctx); err != nil {
+	if err = service.SeedSyntheticFixtures(ctx); err != nil {
 		t.Fatal(err)
 	}
 	_, err = db.Exec("INSERT INTO users(id,email_normalized,password_hash,role,created_at) VALUES('admin','admin@example.test','hash','admin','2026-01-01T00:00:00Z')")

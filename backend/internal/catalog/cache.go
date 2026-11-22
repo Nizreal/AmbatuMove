@@ -17,6 +17,7 @@ type referenceCache struct {
 	items                              map[string]*list.Element
 	lru                                *list.List
 	bytes                              int
+	revision                           int64
 	enabled                            bool
 	hits, misses, evictions, fallbacks uint64
 }
@@ -30,7 +31,7 @@ type CacheStats struct {
 }
 
 func newReferenceCache() *referenceCache {
-	return &referenceCache{items: map[string]*list.Element{}, lru: list.New(), enabled: true}
+	return &referenceCache{items: map[string]*list.Element{}, lru: list.New(), enabled: true, revision: -1}
 }
 func (c *referenceCache) get(key string, destination any) bool {
 	c.mu.Lock()
@@ -96,6 +97,25 @@ func (c *referenceCache) setEnabled(enabled bool) {
 		c.lru.Init()
 		c.bytes = 0
 	}
+}
+func (c *referenceCache) invalidate() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.items = map[string]*list.Element{}
+	c.lru.Init()
+	c.bytes = 0
+	c.revision = -1
+}
+func (c *referenceCache) setRevision(revision int64) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.revision == revision {
+		return
+	}
+	c.items = map[string]*list.Element{}
+	c.lru.Init()
+	c.bytes = 0
+	c.revision = revision
 }
 func (c *referenceCache) stats() CacheStats {
 	c.mu.Lock()

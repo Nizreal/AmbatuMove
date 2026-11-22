@@ -49,6 +49,46 @@ func TestSeedReferenceDataIsIdempotentAndCoversMovementTypes(t *testing.T) {
 	}
 }
 
+func TestSeedReferenceDataPreservesAdministratorEdits(t *testing.T) {
+	service := newSeededCatalog(t)
+	ctx := context.Background()
+	if _, err := service.db.ExecContext(ctx, `UPDATE equipment SET label='Admin Dumbbells',active=0 WHERE id='dumbbell'`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.db.ExecContext(ctx, `UPDATE exercises SET name='Admin Push-Up',category='mobility',description='admin description',active=0 WHERE id='ex_push_up'`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.db.ExecContext(ctx, `DELETE FROM exercise_environments WHERE exercise_id='ex_push_up'`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.db.ExecContext(ctx, `INSERT INTO exercise_environments(exercise_id,environment) VALUES('ex_push_up','outdoor')`); err != nil {
+		t.Fatal(err)
+	}
+	if err := SeedReferenceData(ctx, service.db); err != nil {
+		t.Fatal(err)
+	}
+	var equipmentLabel string
+	var equipmentActive int
+	if err := service.db.QueryRowContext(ctx, `SELECT label,active FROM equipment WHERE id='dumbbell'`).Scan(&equipmentLabel, &equipmentActive); err != nil {
+		t.Fatal(err)
+	}
+	if equipmentLabel != "Admin Dumbbells" || equipmentActive != 0 {
+		t.Fatalf("equipment edit overwritten: label=%q active=%d", equipmentLabel, equipmentActive)
+	}
+	var name, category, description string
+	var active int
+	if err := service.db.QueryRowContext(ctx, `SELECT name,category,description,active FROM exercises WHERE id='ex_push_up'`).Scan(&name, &category, &description, &active); err != nil {
+		t.Fatal(err)
+	}
+	if name != "Admin Push-Up" || category != "mobility" || description != "admin description" || active != 0 {
+		t.Fatalf("exercise edit overwritten: %q %q %q active=%d", name, category, description, active)
+	}
+	var environments int
+	if err := service.db.QueryRowContext(ctx, `SELECT count(*) FROM exercise_environments WHERE exercise_id='ex_push_up'`).Scan(&environments); err != nil || environments != 1 {
+		t.Fatalf("exercise environment edit overwritten: count=%d err=%v", environments, err)
+	}
+}
+
 func TestListExercisesAppliesAllEquipmentFilters(t *testing.T) {
 	service := newSeededCatalog(t)
 	page, err := service.ListExercises(context.Background(), Filters{Equipment: []string{"dumbbell", "flat_bench"}, Limit: 100})

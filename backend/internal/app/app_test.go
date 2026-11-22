@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -21,6 +22,9 @@ func TestFreshApplicationServesCatalogPlanningCaloriesAndGyms(t *testing.T) {
 	cfg, err := config.Load(func(key string) (string, bool) {
 		if key == "APP_ENV" {
 			return "test", true
+		}
+		if key == "SEED_SYNTHETIC_GYMS" {
+			return "true", true
 		}
 		if key == "DATABASE_PATH" {
 			return dbPath, true
@@ -387,5 +391,125 @@ func TestFreshApplicationMigrationAndSeedSurviveRestart(t *testing.T) {
 	second.Handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/api/v1/exercises/ex_push_up", nil))
 	if recorder.Code != http.StatusOK || !strings.Contains(recorder.Body.String(), `"id":"ex_push_up"`) {
 		t.Fatalf("catalog after restart status=%d body=%s", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestProductionStartupPreservesAdminDataAndDeactivatesSyntheticGyms(t *testing.T) {
+	dbPath := t.TempDir() + "/production.sqlite"
+	loadConfig := func() config.Config {
+		cfg, err := config.Load(func(key string) (string, bool) {
+			switch key {
+			case "APP_ENV":
+				return "production", true
+			case "DATABASE_PATH":
+				return dbPath, true
+			case "JWT_SIGNING_KEY":
+				return "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=", true
+			default:
+				return "", false
+			}
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return cfg
+	}
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	first, err := New(context.Background(), loadConfig(), logger)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var synthetic int
+	if err := first.DB.QueryRow(`SELECT count(*) FROM gyms WHERE source_type='synthetic' AND active=1`).Scan(&synthetic); err != nil || synthetic != 0 {
+		t.Fatalf("fresh production startup synthetic active count=%d err=%v", synthetic, err)
+	}
+	_, err = first.DB.Exec(`INSERT INTO gyms(id,name,address_json,latitude,longitude,timezone,contact_json,verification_status,source_type,source_reference,last_updated_at,active) VALUES('old-demo','Old demo','{"street":"","city":"Bandung","region":"West Java","country":"Indonesia"}',-6.9,107.6,'Asia/Jakarta','{}','unverified','synthetic','legacy',datetime('now'),1)`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = first.DB.Exec(`INSERT INTO gyms(id,name,address_json,latitude,longitude,timezone,contact_json,verification_status,source_type,source_reference,last_updated_at,active) VALUES('admin-gym','Admin maintained','{"street":"Jl. Admin","city":"Bandung","region":"West Java","country":"Indonesia"}',-6.9,107.6,'Asia/Jakarta','{}','verified','admin','curated',datetime('now'),1)`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := first.DB.Exec(`UPDATE exercises SET name='Admin maintained walk',description='custom exercise' WHERE id='act_walk_outdoor'`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := first.DB.Exec(`UPDATE equipment SET label='Admin mat',active=0 WHERE id='yoga_mat'`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := first.DB.Exec(`UPDATE facilities SET label='Admin shower' WHERE id='shower'`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := first.DB.Exec(`UPDATE activity_met_profiles SET met_value=2.91 WHERE id='met_walk_out_moderate'`); err != nil {
+		t.Fatal(err)
+	}
+	if err := first.Close(); err != nil {
+		t.Fatal(err)
+	}
+	second, err := New(context.Background(), loadConfig(), logger)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer second.Close()
+	var active int
+	if err := second.DB.QueryRow(`SELECT active FROM gyms WHERE id='old-demo'`).Scan(&active); err != nil || active != 0 {
+		t.Fatalf("legacy synthetic gym active=%d err=%v, want deactivated", active, err)
+	}
+	if err := second.DB.QueryRow(`SELECT active FROM gyms WHERE id='admin-gym'`).Scan(&active); err != nil || active != 1 {
+		t.Fatalf("administrator gym active=%d err=%v, want preserved", active, err)
+	}
+	var exercise, description, equipment, facility string
+	var equipmentActive int
+	var met float64
+	if err := second.DB.QueryRow(`SELECT name,description FROM exercises WHERE id='act_walk_outdoor'`).Scan(&exercise, &description); err != nil {
+		t.Fatal(err)
+	}
+	if err := second.DB.QueryRow(`SELECT label,active FROM equipment WHERE id='yoga_mat'`).Scan(&equipment, &equipmentActive); err != nil {
+		t.Fatal(err)
+	}
+	if err := second.DB.QueryRow(`SELECT label FROM facilities WHERE id='shower'`).Scan(&facility); err != nil {
+		t.Fatal(err)
+	}
+	if err := second.DB.QueryRow(`SELECT met_value FROM activity_met_profiles WHERE id='met_walk_out_moderate'`).Scan(&met); err != nil {
+		t.Fatal(err)
+	}
+	if exercise != "Admin maintained walk" || description != "custom exercise" || equipment != "Admin mat" || equipmentActive != 0 || facility != "Admin shower" || met != 2.91 {
+		t.Fatalf("startup overwrote admin reference data: exercise=%q description=%q equipment=%q/%d facility=%q MET=%v", exercise, description, equipment, equipmentActive, facility, met)
+	}
+}
+
+func TestSyntheticGymsRequireExplicitDevelopmentOptIn(t *testing.T) {
+	newForPath := func(path string, optIn bool) *Application {
+		cfg, err := config.Load(func(key string) (string, bool) {
+			switch key {
+			case "APP_ENV":
+				return "test", true
+			case "DATABASE_PATH":
+				return path, true
+			case "SEED_SYNTHETIC_GYMS":
+				return strconv.FormatBool(optIn), true
+			default:
+				return "", false
+			}
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		application, err := New(context.Background(), cfg, slog.New(slog.NewTextHandler(io.Discard, nil)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return application
+	}
+	without := newForPath(t.TempDir()+"/no-fixtures.sqlite", false)
+	var active int
+	if err := without.DB.QueryRow(`SELECT count(*) FROM gyms WHERE source_type='synthetic' AND active=1`).Scan(&active); err != nil || active != 0 {
+		t.Fatalf("default test startup synthetic gyms=%d err=%v", active, err)
+	}
+	_ = without.Close()
+	with := newForPath(t.TempDir()+"/fixtures.sqlite", true)
+	defer with.Close()
+	if err := with.DB.QueryRow(`SELECT count(*) FROM gyms WHERE source_type='synthetic' AND active=1`).Scan(&active); err != nil || active != 3 {
+		t.Fatalf("explicit fixture startup synthetic gyms=%d err=%v, want 3", active, err)
 	}
 }

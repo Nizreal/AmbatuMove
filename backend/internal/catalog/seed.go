@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"time"
 )
 
 type seedExercise struct {
@@ -93,38 +92,41 @@ func SeedReferenceData(ctx context.Context, db *sql.DB) error {
 	}
 	defer tx.Rollback()
 	for _, item := range equipmentSeeds {
-		if _, err := tx.ExecContext(ctx, `INSERT INTO equipment(id,label,category,active) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET label=excluded.label,category=excluded.category,active=excluded.active`, item.ID, item.Label, item.Category, boolInt(item.Active)); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO equipment(id,label,category,active) VALUES(?,?,?,?) ON CONFLICT(id) DO NOTHING`, item.ID, item.Label, item.Category, boolInt(item.Active)); err != nil {
 			return fmt.Errorf("seed equipment %s: %w", item.ID, err)
 		}
 	}
 	for _, item := range muscleSeeds {
-		if _, err := tx.ExecContext(ctx, `INSERT INTO muscle_groups(id,label) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET label=excluded.label`, item.id, item.label); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO muscle_groups(id,label) VALUES(?,?) ON CONFLICT(id) DO NOTHING`, item.id, item.label); err != nil {
 			return fmt.Errorf("seed muscle group %s: %w", item.id, err)
 		}
 	}
 	for _, item := range exerciseSeeds {
 		instructions, _ := json.Marshal(item.instructions)
-		if _, err := tx.ExecContext(ctx, `INSERT INTO exercises(id,name,description,category,movement_pattern,difficulty,measurement_type,min_space,instructions_json,cautions_json,active,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,1,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,category=excluded.category,movement_pattern=excluded.movement_pattern,difficulty=excluded.difficulty,measurement_type=excluded.measurement_type,min_space=excluded.min_space,instructions_json=excluded.instructions_json,updated_at=excluded.updated_at`, item.id, item.name, "General exercise reference for planning; adjust movement to personal capacity.", item.category, item.pattern, item.difficulty, item.measurement, item.space, string(instructions), "[]", time.Now().UTC().Format(time.RFC3339)); err != nil {
+		result, err := tx.ExecContext(ctx, `INSERT INTO exercises(id,name,description,category,movement_pattern,difficulty,measurement_type,min_space,instructions_json,cautions_json,active,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,1,datetime('now')) ON CONFLICT(id) DO NOTHING`, item.id, item.name, "General exercise reference for planning; adjust movement to personal capacity.", item.category, item.pattern, item.difficulty, item.measurement, item.space, string(instructions), "[]")
+		if err != nil {
 			return fmt.Errorf("seed exercise %s: %w", item.id, err)
 		}
-		for _, table := range []string{"exercise_equipment", "exercise_muscles", "exercise_environments"} {
-			if _, err := tx.ExecContext(ctx, "DELETE FROM "+table+" WHERE exercise_id=?", item.id); err != nil {
-				return err
-			}
+		inserted, err := result.RowsAffected()
+		if err != nil {
+			return fmt.Errorf("check seeded exercise %s: %w", item.id, err)
+		}
+		if inserted == 0 {
+			continue
 		}
 		for _, id := range item.equipment {
-			if _, err := tx.ExecContext(ctx, `INSERT INTO exercise_equipment(exercise_id,equipment_id,required) VALUES(?,?,1)`, item.id, id); err != nil {
+			if _, err := tx.ExecContext(ctx, `INSERT INTO exercise_equipment(exercise_id,equipment_id,required) VALUES(?,?,1) ON CONFLICT DO NOTHING`, item.id, id); err != nil {
 				return fmt.Errorf("seed equipment requirement for %s: %w", item.id, err)
 			}
 		}
 		for index, id := range append(append([]string{}, item.muscles...), item.secondary...) {
 			primary := index < len(item.muscles)
-			if _, err := tx.ExecContext(ctx, `INSERT INTO exercise_muscles(exercise_id,muscle_group_id,is_primary) VALUES(?,?,?)`, item.id, id, boolInt(primary)); err != nil {
+			if _, err := tx.ExecContext(ctx, `INSERT INTO exercise_muscles(exercise_id,muscle_group_id,is_primary) VALUES(?,?,?) ON CONFLICT DO NOTHING`, item.id, id, boolInt(primary)); err != nil {
 				return fmt.Errorf("seed muscle for %s: %w", item.id, err)
 			}
 		}
 		for _, environment := range item.environments {
-			if _, err := tx.ExecContext(ctx, `INSERT INTO exercise_environments(exercise_id,environment) VALUES(?,?)`, item.id, environment); err != nil {
+			if _, err := tx.ExecContext(ctx, `INSERT INTO exercise_environments(exercise_id,environment) VALUES(?,?) ON CONFLICT DO NOTHING`, item.id, environment); err != nil {
 				return fmt.Errorf("seed environment for %s: %w", item.id, err)
 			}
 		}

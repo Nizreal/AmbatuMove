@@ -24,6 +24,7 @@ type Config struct {
 	PartnerRateLimitRPM    int
 	ReferenceCacheEnabled  bool
 	GymCacheEnabled        bool
+	SeedSyntheticGyms      bool
 	TrustedProxyCIDRs      []string
 }
 
@@ -48,6 +49,7 @@ func Load(getenv lookupEnv) (Config, error) {
 		TrustedProxyCIDRs:     splitCSV(value("TRUSTED_PROXY_CIDRS", "")),
 		ReferenceCacheEnabled: boolValue(value("REFERENCE_CACHE_ENABLED", "true")),
 		GymCacheEnabled:       boolValue(value("GYM_CACHE_ENABLED", "true")),
+		SeedSyntheticGyms:     boolValue(value("SEED_SYNTHETIC_GYMS", "false")),
 	}
 	var err error
 	if cfg.PlannerMaxGenerationMS, err = intValue(value("PLANNER_MAX_GENERATION_MS", "1500"), "PLANNER_MAX_GENERATION_MS", 100, 10000); err != nil {
@@ -67,6 +69,12 @@ func Load(getenv lookupEnv) (Config, error) {
 	}
 	if _, err := strconv.ParseBool(value("GYM_CACHE_ENABLED", "true")); err != nil {
 		return Config{}, fmt.Errorf("GYM_CACHE_ENABLED must be true or false")
+	}
+	if _, err := strconv.ParseBool(value("SEED_SYNTHETIC_GYMS", "false")); err != nil {
+		return Config{}, fmt.Errorf("SEED_SYNTHETIC_GYMS must be true or false")
+	}
+	if cfg.AppEnv == "production" && cfg.SeedSyntheticGyms {
+		return Config{}, fmt.Errorf("SEED_SYNTHETIC_GYMS is only allowed in development or test environments")
 	}
 	host, port, addrErr := net.SplitHostPort(cfg.HTTPAddr)
 	portNumber, portErr := strconv.Atoi(port)

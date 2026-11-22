@@ -1,0 +1,185 @@
+[
+  {
+    "id": "gym_bandung_fithub_merdeka",
+    "name": "FIT HUB Bandung Merdeka",
+    "address": "Jl. Merdeka No. 26, floors 2 and 3, Babakan Ciamis, Sumur Bandung, Indonesia",
+    "source_urls": [
+      "https://fithub.id/location/jawa-barat/bandung-merdeka",
+      "https://id.linkedin.com/company/fit-hub-id",
+      "https://timesindonesia.co.id/olahraga/616283/fit-hub-perluas-dan-relokasi-cabang-tingkatkan-kenyamanan-member"
+    ],
+    "reason": "Priority branch. Official FIT HUB announcement and reporting confirm recent relocation/upgrade and advertise 24-hour access; branch website still displays regular hours. Confirm current member/visitor access and exact pin at No. 26 before import. Official announcement confirms HYROX Training Club, gym/class areas, massage chairs and community area; specific canonical equipment inventory and quantities remain unconfirmed. Public branch phone: +6281959563767. Desk research 2026-11-22."
+  },
+  {
+    "id": "gym_bandung_osbond_ciwalk",
+    "name": "Osbond Gym Ciwalk Corbuzier Series",
+    "address": {
+      "street": "Cihampelas Walk, Jl. Cihampelas No. 160, Cipaganti, Coblong",
+      "city": "Bandung",
+      "region": "West Java",
+      "country": "Indonesia"
+    },
+    "location": {
+      "latitude": -6.8930491,
+      "longitude": 107.6055772
+    },
+    "timezone": "Asia/Jakarta",
+    "contact": {
+      "website_url": "https://www.osbondgym.com/club"
+    },
+    "opening_hours": {},
+    "price_info": {},
+    "verification_status": "unverified",
+    "source_type": "official",
+    "source_reference": "https://www.osbondgym.com/club | https://fitnesloka.com/location/golds-gym-ciwalk/ | Desk research 2026-11-22. Coordinate is approximate Ciwalk gym-location reference from an older listing of a different operator in the same mall. Confirm actual Osbond pin, floor, branch equipment and hours before publishing. No chain-wide amenities assumed.",
+    "verified_at": null,
+    "facilities": [],
+    "equipment": []
+  },
+  {
+    "id": "gym_bandung_ftl_dago",
+    "name": "FTL Gym Dago",
+    "address": {
+      "street": "Jl. Ir. H. Juanda No. 151, Lebak Siliwangi, Coblong",
+      "city": "Bandung",
+      "region": "West Java",
+      "country": "Indonesia"
+    },
+    "location": {
+      "latitude": -6.88885955,
+      "longitude": 107.60820699
+    },
+    "timezone": "Asia/Jakarta",
+    "contact": {
+      "website_url": "https://ftlgym.com/outlet/dago"
+    },
+    "opening_hours": {
+      "notes": "Official outlet advertises 24-hour access; confirm member/visitor policy."
+    },
+    "price_info": {},
+    "verification_status": "unverified",
+    "source_type": "official",
+    "source_reference": "https://ftlgym.com/outlet/dago | Desk research 2026-11-22. Coordinate is the center of the official branch page embedded map, approximate and needs pin confirmation. Official branch advertises 24-hour access, but no specific equipment inventory was established.",
+    "verified_at": null,
+    "facilities": [],
+    "equipment": []
+  },
+  {
+    "id": "gym_bandung_fithub_setiabudi",
+    "name": "FIT HUB Setiabudi Bandung",
+    "address": "Jl. Dr. Setiabudi No. 41G, 2nd floor, Pasteur, Sukajadi, Bandung, Indonesia",
+    "source_urls": [
+      "https://fithub.id/location/bandung/setiabudi-bandung"
+    ],
+    "reason": "Confirm branch coordinates and equipment. Network equipment varies by club."
+  },
+  {
+    "id": "gym_bandung_anytime_heritage",
+    "name": "Anytime Fitness Heritage Riau",
+    "address": "Heritage Lifestyle Hub, Jl. L. L. R. E. Martadinata, Citarum, Bandung, Indonesia",
+    "source_urls": [
+      "https://www.anytimefitness.com/en-id/locations/jawa-barat-java-id-0013"
+    ],
+    "reason": "Confirm branch coordinates and specific equipment."
+  },
+  {
+    "id": "gym_bandung_anytime_mekarwangi",
+    "name": "Anytime Fitness Mekarwangi Junction",
+    "address": "Jl. Mekar Sejahtera, Mekarwangi, Bojongloa Kidul, Bandung, Indonesia",
+    "source_urls": [
+      "https://www.anytimefitness.com/en-id/locations/jawa-barat-bandung-id-0083"
+    ],
+    "reason": "Confirm coordinates. Official branch page lists dumbbell, barbell, squat rack, treadmill, stationary bike, rowing machine, kettlebell, medicine ball, resistance band, shower and parking."
+  },
+  {
+    "id": "gym_bandung_urban",
+    "name": "Urban Gym",
+    "address": "Jl. Dago Asri, Coblong, Bandung, Indonesia",
+    "source_urls": [
+      "https://reps-id.com/gym-profile/urban-gym/",
+      "https://www.waze.com/live-map/directions/id/west-java/urban-gym?to=place.ChIJc-1sX_vmaC4Rd2Q8FUWjocM"
+    ],
+    "reason": "Sources disagree on number 8 vs 12; confirm pin and specific equipment. Review mentions lockers and parking; verify."
+  },
+  {
+    "id": "gym_bandung_fithub_lengkong",
+    "name": "FIT HUB Lengkong Kecil",
+    "address": "Jl. Lengkong Kecil No. 52, Paledang, Lengkong, Bandung, West Java, Indonesia",
+    "source_urls": [
+      "https://www.atomefinance.co.id/paylater-merchants/fit-hub"
+    ],
+    "reason": "Confirm coordinates, branch-specific machines and amenities. Desk research 2026-11-22."
+  },
+  {
+    "id": "gym_bandung_fithub_buahbatu",
+    "name": "FIT HUB Buahbatu",
+    "address": "Jl. Buah Batu No. 258, Turangga, Lengkong, Bandung, West Java, Indonesia",
+    "source_urls": [
+      "https://www.atomefinance.co.id/paylater-merchants/fit-hub"
+    ],
+    "reason": "Confirm coordinates, branch-specific machines and amenities. Desk research 2026-11-22."
+  },
+  {
+    "id": "gym_bandung_fithub_surya_sumantri",
+    "name": "FIT HUB Surya Sumantri",
+    "address": "Jl. Surya Sumantri No. 53, Sukawarna, Sukajadi, Bandung, West Java, Indonesia",
+    "source_urls": [
+      "https://fithub.id/location/bandung/surya-sumantri"
+    ],
+    "reason": "Official page gives weekday 05:00-24:00 and weekend 06:00-21:00 hours; confirm coordinates and equipment. Desk research 2026-11-22."
+  },
+  {
+    "id": "gym_bandung_fithub_kopo",
+    "name": "FIT HUB Kopo",
+    "address": "Jl. Raya Kopo No. 472, Margahayu Utara, Babakan Ciparay, Bandung, West Java, Indonesia",
+    "source_urls": [
+      "https://fithub.id/location/bandung/kopo"
+    ],
+    "reason": "Official page gives weekday 05:00-24:00 and weekend 06:00-21:00 hours; confirm coordinates and equipment. Desk research 2026-11-22."
+  },
+  {
+    "id": "gym_bandung_fithub_summarecon",
+    "name": "FIT HUB Summarecon Bandung",
+    "address": "Jl. Boulevard Utama, Ruko No. 22, 26 and 28, Rancabolang, Gedebage, Bandung, West Java, Indonesia",
+    "source_urls": [
+      "https://fithub.id/location/bandung/summarecon-bandung"
+    ],
+    "reason": "Confirm coordinates and equipment; distinct from Anytime Fitness Summarecon Mall. Desk research 2026-11-22."
+  },
+  {
+    "id": "gym_bandung_ftl_sukajadi",
+    "name": "FTL Gym Sukajadi",
+    "address": "Jl. Sukajadi No. 207, Gegerkalong, Sukasari, Bandung, West Java, Indonesia",
+    "source_urls": [
+      "https://ftlgym.com/outlet/sukajadi"
+    ],
+    "reason": "Official branch page advertises 24-hour access, treadmills, bikes, ellipticals, mats, barbells and plates. Confirm pin, specific machine types, quantities and amenities. Desk research 2026-11-22."
+  },
+  {
+    "id": "gym_bandung_ftl_merdeka",
+    "name": "FTL Gym Merdeka",
+    "address": "Jl. Merdeka No. 35, Babakan Ciamis, Sumur Bandung, Bandung, West Java, Indonesia",
+    "source_urls": [
+      "https://ftlgym.com/outlet/merdeka"
+    ],
+    "reason": "Official branch page advertises 24-hour access, treadmills, bikes, ellipticals, mats, barbells and plates. Confirm pin, specific machine types, quantities and amenities. Desk research 2026-11-22."
+  },
+  {
+    "id": "gym_bandung_ftl_ahmad_yani",
+    "name": "FTL Gym Ahmad Yani",
+    "address": "Jl. Ahmad Yani No. 254, Kacapiring, Batununggal, Bandung, West Java, Indonesia",
+    "source_urls": [
+      "https://ftlgym.com/"
+    ],
+    "reason": "Listed on official website; confirm coordinates and branch equipment. Desk research 2026-11-22."
+  },
+  {
+    "id": "gym_bandung_ftl_pasir_koja",
+    "name": "FTL Gym Pasir Koja",
+    "address": "Jl. Terusan Pasirkoja No. 275, Sukahaji, Babakan Ciparay, Bandung, West Java, Indonesia",
+    "source_urls": [
+      "https://ftlgym.com/"
+    ],
+    "reason": "Listed on official website; confirm coordinates and branch equipment. Desk research 2026-11-22."
+  }
+]

@@ -78,3 +78,48 @@ func TestSchemaVersionReportsAppliedMigrations(t *testing.T) {
 		t.Fatalf("schema-version output=%q, want %q", output, want)
 	}
 }
+
+func TestAdminReferenceImportDryRunAndExportCommands(t *testing.T) {
+	dir := t.TempDir()
+	dbPath := filepath.Join(dir, "admin.sqlite")
+	cfg, err := config.Load(func(key string) (string, bool) {
+		if key == "DATABASE_PATH" {
+			return dbPath, true
+		}
+		return "", false
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	inputPath := filepath.Join(dir, "equipment.json")
+	document := `[{"id":"hex_dumbbell","label":"Hex Dumbbell","category":"free_weight","active":true}]`
+	if err := os.WriteFile(inputPath, []byte(document), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := admin(cfg, []string{"equipment", "import", "--file", inputPath, "--dry-run"}); err != nil {
+		t.Fatalf("dry-run import: %v", err)
+	}
+	db, err := storage.OpenSQLite(context.Background(), dbPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var count int
+	if err := db.QueryRow(`SELECT count(*) FROM equipment WHERE id='hex_dumbbell'`).Scan(&count); err != nil || count != 0 {
+		t.Fatalf("CLI dry-run wrote %d rows (err=%v)", count, err)
+	}
+	_ = db.Close()
+	if err := admin(cfg, []string{"equipment", "import", "--file", inputPath}); err != nil {
+		t.Fatalf("import command: %v", err)
+	}
+	exportPath := filepath.Join(dir, "equipment-export.json")
+	if err := admin(cfg, []string{"equipment", "export", "--file", exportPath}); err != nil {
+		t.Fatalf("export command: %v", err)
+	}
+	exported, err := os.ReadFile(exportPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(exported), `"id": "hex_dumbbell"`) {
+		t.Fatalf("export omitted imported record: %s", exported)
+	}
+}

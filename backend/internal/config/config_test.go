@@ -13,6 +13,41 @@ func TestLoadUsesDevelopmentDefaults(t *testing.T) {
 	if got.HTTPAddr != ":8080" || got.DatabasePath != "./data/ambatumove.sqlite" || got.LogLevel != "info" {
 		t.Fatalf("unexpected defaults: %+v", got)
 	}
+	if got.SeedSyntheticGyms {
+		t.Fatal("synthetic gyms must be disabled by default")
+	}
+}
+
+func TestSyntheticGymSeedingRequiresExplicitNonProductionOptIn(t *testing.T) {
+	for _, env := range []string{"development", "test"} {
+		cfg, err := Load(func(key string) (string, bool) {
+			if key == "APP_ENV" {
+				return env, true
+			}
+			if key == "SEED_SYNTHETIC_GYMS" {
+				return "true", true
+			}
+			return "", false
+		})
+		if err != nil || !cfg.SeedSyntheticGyms {
+			t.Fatalf("explicit %s fixture opt-in config=%+v err=%v", env, cfg, err)
+		}
+	}
+	_, err := Load(func(key string) (string, bool) {
+		switch key {
+		case "APP_ENV":
+			return "production", true
+		case "JWT_SIGNING_KEY":
+			return "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=", true
+		case "SEED_SYNTHETIC_GYMS":
+			return "true", true
+		default:
+			return "", false
+		}
+	})
+	if err == nil || !strings.Contains(err.Error(), "SEED_SYNTHETIC_GYMS") {
+		t.Fatalf("production synthetic seed config error=%v, want explicit prohibition", err)
+	}
 }
 
 func TestLoadRejectsOutOfRangePlannerTimeout(t *testing.T) {

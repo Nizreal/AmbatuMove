@@ -1,0 +1,385 @@
+[
+  {
+    "id": "gym_bandung_saraga_itb",
+    "name": "SARAGA ITB Fitness Center",
+    "address": {
+      "street": "Jl. Tamansari No. 90, Lebak Siliwangi, Coblong",
+      "city": "Bandung",
+      "region": "West Java",
+      "country": "Indonesia"
+    },
+    "location": {
+      "latitude": -6.8858957,
+      "longitude": 107.6107082
+    },
+    "timezone": "Asia/Jakarta",
+    "contact": {
+      "website_url": "https://itb.ac.id/sports-center"
+    },
+    "opening_hours": {},
+    "price_info": {
+      "notes": "Day pass and monthly membership available; prices unknown."
+    },
+    "verification_status": "unverified",
+    "source_type": "official",
+    "source_reference": "https://itb.ac.id/sports-center | https://fitnesloka.com/location/saraga-itb-fitness/ | Desk research 2026-11-22. ITB lists treadmill and static bike. Bench press also mentioned, but bench type is unclear. Address no. 73 is for the overall sports complex; gym-specific listing gives no. 90. Published hours conflict; confirm with operator. Daily pass and monthly membership mentioned, rates unknown.",
+    "verified_at": null,
+    "facilities": [],
+    "equipment": [
+      {
+        "equipment_id": "treadmill",
+        "label": "Treadmill",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      },
+      {
+        "equipment_id": "stationary_bike",
+        "label": "Stationary bike",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      }
+    ]
+  },
+  {
+    "id": "gym_bandung_rebel_dago",
+    "name": "Rebel Gym Dago",
+    "address": {
+      "street": "Jl. Kyai Gede Utama No. 14, Lebakgede, Coblong",
+      "city": "Bandung",
+      "region": "West Java",
+      "country": "Indonesia"
+    },
+    "location": {
+      "latitude": -6.896556,
+      "longitude": 107.6142787
+    },
+    "timezone": "Asia/Jakarta",
+    "contact": {
+      "phone": "+6281220033666",
+      "website_url": "https://www.rebelkombat.com/rebeldago"
+    },
+    "opening_hours": {},
+    "price_info": {},
+    "verification_status": "unverified",
+    "source_type": "official",
+    "source_reference": "https://www.rebelkombat.com/rebeldago | https://fitnesloka.com/location/rebel-gym/ | Desk research 2026-11-22. Branch advertises kettlebell training; other specific machines not confirmed. Website and directory report different hours; confirm current opening times.",
+    "verified_at": null,
+    "facilities": [],
+    "equipment": [
+      {
+        "equipment_id": "kettlebell",
+        "label": "Kettlebell",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      }
+    ]
+  },
+  {
+    "id": "gym_bandung_ajs",
+    "name": "AJS Gym Fitness",
+    "address": {
+      "street": "Jl. Bangbayang Selatan No. 35, Sekeloa, Coblong",
+      "city": "Bandung",
+      "region": "West Java",
+      "country": "Indonesia"
+    },
+    "location": {
+      "latitude": -6.8819454,
+      "longitude": 107.6168193
+    },
+    "timezone": "Asia/Jakarta",
+    "contact": {},
+    "opening_hours": {
+      "monday": "07:00-21:00",
+      "tuesday": "07:00-21:00",
+      "wednesday": "07:00-21:00",
+      "thursday": "07:00-21:00",
+      "friday": "07:00-21:00",
+      "saturday": "07:00-17:00",
+      "sunday": "closed"
+    },
+    "price_info": {},
+    "verification_status": "unverified",
+    "source_type": "admin",
+    "source_reference": "https://fitnesloka.com/location/ajs-gym-fitness/ | Desk research 2026-11-22. Directory location; equipment and membership prices require survey. Listed hours may have changed.",
+    "verified_at": null,
+    "facilities": [],
+    "equipment": []
+  },
+  {
+    "id": "gym_bandung_79_gym",
+    "name": "79 Gym Fitness Center",
+    "address": {
+      "street": "Jl. Pelesiran No. 79, Tamansari, Bandung Wetan",
+      "city": "Bandung",
+      "region": "West Java",
+      "country": "Indonesia"
+    },
+    "location": {
+      "latitude": -6.8953791,
+      "longitude": 107.6053138
+    },
+    "timezone": "Asia/Jakarta",
+    "contact": {},
+    "opening_hours": {
+      "monday": "09:00-22:00",
+      "tuesday": "09:00-22:00",
+      "wednesday": "09:00-22:00",
+      "thursday": "09:00-22:00",
+      "friday": "09:00-22:00",
+      "saturday": "09:00-22:00",
+      "sunday": "closed"
+    },
+    "price_info": {
+      "currency": "IDR",
+      "day_pass": 15000,
+      "notes": "Community-reported, last checked October 2026; confirm current rate."
+    },
+    "verification_status": "unverified",
+    "source_type": "admin",
+    "source_reference": "https://fitnesloka.com/location/79-gym-fitness-center/ | https://www.dailysweat.co/indonesia/bandung/79-gym-fitness-center-8b73df | Desk research 2026-11-22. Directory and community listing report address and hours; day pass reported October 2026, not operator-confirmed. Locker security and equipment need survey.",
+    "verified_at": null,
+    "facilities": [],
+    "equipment": []
+  },
+  {
+    "id": "gym_bandung_rendi",
+    "name": "Rendi Fitness",
+    "address": {
+      "street": "Jl. Sederhana, Pasteur, Sukajadi",
+      "city": "Bandung",
+      "region": "West Java",
+      "country": "Indonesia"
+    },
+    "location": {
+      "latitude": -6.8911905,
+      "longitude": 107.5993084
+    },
+    "timezone": "Asia/Jakarta",
+    "contact": {},
+    "opening_hours": {},
+    "price_info": {},
+    "verification_status": "unverified",
+    "source_type": "admin",
+    "source_reference": "https://fitnesloka.com/location/rendi-fitness/ | Desk research 2026-11-22. Directory listing; current operation, hours and inventory require confirmation.",
+    "verified_at": null,
+    "facilities": [],
+    "equipment": []
+  },
+  {
+    "id": "gym_bandung_david_sports",
+    "name": "David Sports Gym Bandung",
+    "address": {
+      "street": "Jl. Lemahnendeut No. 7, Sukawarna, Sukajadi",
+      "city": "Bandung",
+      "region": "West Java",
+      "country": "Indonesia"
+    },
+    "location": {
+      "latitude": -6.883484,
+      "longitude": 107.5802883
+    },
+    "timezone": "Asia/Jakarta",
+    "contact": {},
+    "opening_hours": {},
+    "price_info": {},
+    "verification_status": "unverified",
+    "source_type": "admin",
+    "source_reference": "https://fitnesloka.com/location/david-sports-gym-bandung/ | Desk research 2026-11-22. Directory listing; confirm current operation, membership access and equipment.",
+    "verified_at": null,
+    "facilities": [],
+    "equipment": []
+  },
+  {
+    "id": "gym_bandung_fitness_ideal",
+    "name": "Fitness Ideal Universitas Padjadjaran",
+    "address": {
+      "street": "Jl. Dipati Ukur No. 46, Lebakgede, Coblong",
+      "city": "Bandung",
+      "region": "West Java",
+      "country": "Indonesia"
+    },
+    "location": {
+      "latitude": -6.8951794,
+      "longitude": 107.6177191
+    },
+    "timezone": "Asia/Jakarta",
+    "contact": {},
+    "opening_hours": {},
+    "price_info": {},
+    "verification_status": "unverified",
+    "source_type": "official",
+    "source_reference": "https://fisip.unpad.ac.id/profil/fasilitas/ | https://fitnesloka.com/location/fitness-ideal/ | Desk research 2026-11-22. University lists Fitness Ideal as a facility. Current access and individual equipment types require confirmation.",
+    "verified_at": null,
+    "facilities": [],
+    "equipment": []
+  },
+  {
+    "id": "gym_bandung_ninety_six",
+    "name": "Ninety Six Fitness Center",
+    "address": {
+      "street": "Holiday Inn Bandung Pasteur, Jl. Dr. Djunjunan No. 96, Pasteur, Sukajadi",
+      "city": "Bandung",
+      "region": "West Java",
+      "country": "Indonesia"
+    },
+    "location": {
+      "latitude": -6.8956246,
+      "longitude": 107.5910148
+    },
+    "timezone": "Asia/Jakarta",
+    "contact": {
+      "website_url": "https://bandungpasteur.holidayinn.com/facilities/"
+    },
+    "opening_hours": {},
+    "price_info": {
+      "currency": "IDR",
+      "monthly_membership": 500000,
+      "notes": "Published promotional one-month membership; confirm current offer."
+    },
+    "verification_status": "unverified",
+    "source_type": "official",
+    "source_reference": "https://bandungpasteur.holidayinn.com/facilities/ | https://www.ihg.com/holidayinn/hotels/us/en/bandung/bdopa/hoteldetail/amenities | https://bandungpasteur.holidayinn.com/special-offers/ | https://fitnesloka.com/location/ninety-six-fitness-center/ | Desk research 2026-11-22. Hotel and membership gym. IHG lists rower, stationary bicycle and treadmill. Generic free weights not mapped to dumbbell/barbell without confirmation. Hotel and member hours differ; English and Indonesian pages conflict on member hours. Price is advertised membership offer, subject to change.",
+    "verified_at": null,
+    "facilities": [
+      "locker",
+      "parking"
+    ],
+    "equipment": [
+      {
+        "equipment_id": "rowing_machine",
+        "label": "Rowing machine",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      },
+      {
+        "equipment_id": "stationary_bike",
+        "label": "Stationary bike",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      },
+      {
+        "equipment_id": "treadmill",
+        "label": "Treadmill",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      }
+    ]
+  },
+  {
+    "id": "gym_bandung_anytime_summarecon",
+    "name": "Anytime Fitness Summarecon Mall Bandung",
+    "address": {
+      "street": "Summarecon Mall Bandung, Cisaranten Kidul, Gedebage",
+      "city": "Bandung",
+      "region": "West Java",
+      "country": "Indonesia"
+    },
+    "location": {
+      "latitude": -6.9549875,
+      "longitude": 107.696703125
+    },
+    "timezone": "Asia/Jakarta",
+    "contact": {
+      "website_url": "https://www.anytimefitness.com/en-id/locations/bandung-java-id-0033"
+    },
+    "opening_hours": {
+      "notes": "24-hour member access advertised; staffed hours may differ."
+    },
+    "price_info": {},
+    "verification_status": "unverified",
+    "source_type": "official",
+    "source_reference": "https://www.anytimefitness.com/en-id/locations/bandung-java-id-0033 | Desk research 2026-11-22. Coordinates decoded from branch-listed short Plus Code 2MWW+2M4 in Bandung (full code 6P592MWW+2M4). Equipment and facilities listed on branch page; quantities and current serviceability require field confirmation.",
+    "verified_at": null,
+    "facilities": [
+      "shower",
+      "parking"
+    ],
+    "equipment": [
+      {
+        "equipment_id": "stationary_bike",
+        "label": "Stationary bike",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      },
+      {
+        "equipment_id": "rowing_machine",
+        "label": "Rowing machine",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      },
+      {
+        "equipment_id": "treadmill",
+        "label": "Treadmill",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      },
+      {
+        "equipment_id": "dumbbell",
+        "label": "Dumbbell",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      },
+      {
+        "equipment_id": "kettlebell",
+        "label": "Kettlebell",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      },
+      {
+        "equipment_id": "medicine_ball",
+        "label": "Medicine ball",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      },
+      {
+        "equipment_id": "resistance_band",
+        "label": "Resistance band",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      },
+      {
+        "equipment_id": "barbell",
+        "label": "Barbell",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      },
+      {
+        "equipment_id": "squat_rack",
+        "label": "Squat rack",
+        "quantity": null,
+        "status": "present",
+        "verified_at": null,
+        "source_type": "official"
+      }
+    ]
+  }
+]

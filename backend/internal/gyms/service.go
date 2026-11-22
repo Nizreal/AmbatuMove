@@ -22,8 +22,20 @@ type Service struct {
 func NewService(db *sql.DB) *Service            { return &Service{db: db, cache: newGymReadCache()} }
 func (s *Service) CacheStats() CacheStats       { return s.cache.stats() }
 func (s *Service) SetCacheEnabled(enabled bool) { s.cache.setEnabled(enabled) }
+func (s *Service) InvalidateCache()             { s.cache.invalidate() }
+func (s *Service) refreshCacheRevision(ctx context.Context) error {
+	var revision int64
+	if err := s.db.QueryRowContext(ctx, "SELECT revision FROM reference_data_revision WHERE id=1").Scan(&revision); err != nil {
+		return err
+	}
+	s.cache.setRevision(revision)
+	return nil
+}
 
 func (s *Service) Search(ctx context.Context, request Search) (Page, error) {
+	if err := s.refreshCacheRevision(ctx); err != nil {
+		return Page{}, err
+	}
 	if request.Limit == 0 {
 		request.Limit = 20
 	}
@@ -146,6 +158,9 @@ func (r Search) RadiusKmOrDefault() *float64 {
 }
 
 func (s *Service) Get(ctx context.Context, id string) (Gym, error) {
+	if err := s.refreshCacheRevision(ctx); err != nil {
+		return Gym{}, err
+	}
 	var cached Gym
 	if s.cache.get("gym:"+id, &cached) {
 		return cached, nil
@@ -194,6 +209,9 @@ func (s *Service) Get(ctx context.Context, id string) (Gym, error) {
 }
 
 func (s *Service) Equipment(ctx context.Context, gymID string) ([]EquipmentItem, error) {
+	if err := s.refreshCacheRevision(ctx); err != nil {
+		return nil, err
+	}
 	var cached []EquipmentItem
 	if s.cache.get("equipment:"+gymID, &cached) {
 		return cached, nil
@@ -231,6 +249,9 @@ func (s *Service) Equipment(ctx context.Context, gymID string) ([]EquipmentItem,
 }
 
 func (s *Service) Facilities(ctx context.Context, gymID string) ([]Facility, error) {
+	if err := s.refreshCacheRevision(ctx); err != nil {
+		return nil, err
+	}
 	var cached []Facility
 	if s.cache.get("facilities:"+gymID, &cached) {
 		return cached, nil
@@ -263,6 +284,9 @@ func (s *Service) Facilities(ctx context.Context, gymID string) ([]Facility, err
 }
 
 func (s *Service) ListFacilities(ctx context.Context) ([]Facility, error) {
+	if err := s.refreshCacheRevision(ctx); err != nil {
+		return nil, err
+	}
 	var cached []Facility
 	if s.cache.get("facilities:vocabulary", &cached) {
 		return cached, nil
@@ -381,18 +405,46 @@ func (s *Service) facilityIDs(ctx context.Context, gymID string) ([]string, erro
 	return ids, rows.Err()
 }
 
-func (s *Service) Seed(ctx context.Context) error {
+var defaultFacilities = []Facility{{ID: "shower", Label: "Shower", Category: "amenity"}, {ID: "locker", Label: "Locker", Category: "amenity"}, {ID: "parking", Label: "Parking", Category: "amenity"}, {ID: "drinking_water", Label: "Drinking water", Category: "amenity"}, {ID: "accessible_entrance", Label: "Accessible entrance", Category: "accessibility"}}
+
+// SeedFacilities initializes missing facility vocabulary without replacing
+// values maintained by an administrator.
+func SeedFacilities(ctx context.Context, db *sql.DB) error {
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	for _, item := range defaultFacilities {
+		if _, err := tx.ExecContext(ctx, "INSERT INTO facilities(id,label,category) VALUES(?,?,?) ON CONFLICT(id) DO NOTHING", item.ID, item.Label, item.Category); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
+// DeactivateSynthetic preserves fixture rows and their references for local
+// reproducibility while ensuring they cannot appear in public results.
+func (s *Service) DeactivateSynthetic(ctx context.Context) error {
+	if _, err := s.db.ExecContext(ctx, "UPDATE gyms SET active=0 WHERE source_type='synthetic' AND active<>0"); err != nil {
+		return err
+	}
+	s.cache.invalidate()
+	return nil
+}
+
+// SeedSyntheticFixtures creates opt-in local fixtures. Existing rows and their
+// inventories are preserved so repeated development startup cannot overwrite
+// edits made in an administrator workflow.
+func (s *Service) SeedSyntheticFixtures(ctx context.Context) error {
+	if err := SeedFacilities(ctx, s.db); err != nil {
+		return err
+	}
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
-	facilities := []Facility{{ID: "shower", Label: "Shower", Category: "amenity"}, {ID: "locker", Label: "Locker", Category: "amenity"}, {ID: "parking", Label: "Parking", Category: "amenity"}, {ID: "drinking_water", Label: "Drinking water", Category: "amenity"}, {ID: "accessible_entrance", Label: "Accessible entrance", Category: "accessibility"}}
-	for _, item := range facilities {
-		if _, err := tx.ExecContext(ctx, "INSERT INTO facilities(id,label,category) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET label=excluded.label,category=excluded.category", item.ID, item.Label, item.Category); err != nil {
-			return err
-		}
-	}
 	fixtures := []struct {
 		id, name, city      string
 		latitude, longitude float64
@@ -422,23 +474,16 @@ func (s *Service) Seed(ctx context.Context) error {
 	for _, fixture := range fixtures {
 		address, _ := json.Marshal(Address{Street: "Synthetic demonstration address", City: fixture.city, Region: "Synthetic region", Country: "Indonesia"})
 		contact, _ := json.Marshal(map[string]any{"phone": nil, "website_url": nil})
-		if _, err := tx.ExecContext(ctx, `INSERT INTO gyms(id,name,address_json,latitude,longitude,timezone,contact_json,verification_status,source_type,source_reference,verified_at,last_updated_at,active) VALUES(?,?,?,?,?,'Asia/Jakarta',?,'unverified','synthetic','Synthetic fixture; not a real surveyed business',NULL,'2026-11-21T00:00:00Z',1)
-			ON CONFLICT(id) DO UPDATE SET name=excluded.name,address_json=excluded.address_json,latitude=excluded.latitude,longitude=excluded.longitude,verification_status='unverified',source_type='synthetic',source_reference=excluded.source_reference,verified_at=NULL,last_updated_at=excluded.last_updated_at,active=1`, fixture.id, fixture.name, string(address), fixture.latitude, fixture.longitude, string(contact)); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO gyms(id,name,address_json,latitude,longitude,timezone,contact_json,verification_status,source_type,source_reference,verified_at,last_updated_at,active) VALUES(?,?,?,?,?,'Asia/Jakarta',?,'unverified','synthetic','Synthetic fixture; not a real surveyed business',NULL,'2026-11-21T00:00:00Z',1) ON CONFLICT(id) DO NOTHING`, fixture.id, fixture.name, string(address), fixture.latitude, fixture.longitude, string(contact)); err != nil {
 			return fmt.Errorf("seed gym %s: %w", fixture.id, err)
 		}
-		if _, err := tx.ExecContext(ctx, "DELETE FROM gym_equipment WHERE gym_id=?", fixture.id); err != nil {
-			return err
-		}
-		if _, err := tx.ExecContext(ctx, "DELETE FROM gym_facilities WHERE gym_id=?", fixture.id); err != nil {
-			return err
-		}
 		for _, item := range fixture.equipment {
-			if _, err := tx.ExecContext(ctx, `INSERT INTO gym_equipment(gym_id,equipment_id,quantity,status,verified_at,source_type) VALUES(?,?,?, ?,NULL,'synthetic')`, fixture.id, item.id, item.quantity, item.status); err != nil {
+			if _, err := tx.ExecContext(ctx, `INSERT INTO gym_equipment(gym_id,equipment_id,quantity,status,verified_at,source_type) VALUES(?,?,?, ?,NULL,'synthetic') ON CONFLICT(gym_id,equipment_id) DO NOTHING`, fixture.id, item.id, item.quantity, item.status); err != nil {
 				return err
 			}
 		}
 		for _, facilityID := range fixture.facilities {
-			if _, err := tx.ExecContext(ctx, `INSERT INTO gym_facilities(gym_id,facility_id,verified_at,source_type) VALUES(?,?,NULL,'synthetic')`, fixture.id, facilityID); err != nil {
+			if _, err := tx.ExecContext(ctx, `INSERT INTO gym_facilities(gym_id,facility_id,verified_at,source_type) VALUES(?,?,NULL,'synthetic') ON CONFLICT(gym_id,facility_id) DO NOTHING`, fixture.id, facilityID); err != nil {
 				return err
 			}
 		}

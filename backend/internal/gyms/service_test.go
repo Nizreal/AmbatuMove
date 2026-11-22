@@ -25,7 +25,7 @@ func newGymService(t *testing.T) *Service {
 		t.Fatal(err)
 	}
 	service := NewService(db)
-	if err := service.Seed(context.Background()); err != nil {
+	if err := service.SeedSyntheticFixtures(context.Background()); err != nil {
 		t.Fatal(err)
 	}
 	return service
@@ -69,6 +69,36 @@ func TestGymDetailIncludesInventoryAndUnverifiedProvenance(t *testing.T) {
 	ids, status, err := service.AvailableEquipment(context.Background(), item.ID)
 	if err != nil || status != "unverified" || len(ids) != 4 {
 		t.Fatalf("available inventory ids=%v status=%s err=%v", ids, status, err)
+	}
+}
+
+func TestSyntheticFixtureSeederDoesNotOverwriteStoredGymChanges(t *testing.T) {
+	service := newGymService(t)
+	ctx := context.Background()
+	if _, err := service.db.ExecContext(ctx, `UPDATE gyms SET name='Admin-managed studio',active=0 WHERE id='gym_demo_jakarta_001'`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.db.ExecContext(ctx, `UPDATE gym_equipment SET quantity=9,status='out_of_service' WHERE gym_id='gym_demo_jakarta_001' AND equipment_id='dumbbell'`); err != nil {
+		t.Fatal(err)
+	}
+	if err := service.SeedSyntheticFixtures(ctx); err != nil {
+		t.Fatal(err)
+	}
+	var name string
+	var active int
+	if err := service.db.QueryRowContext(ctx, `SELECT name,active FROM gyms WHERE id='gym_demo_jakarta_001'`).Scan(&name, &active); err != nil {
+		t.Fatal(err)
+	}
+	if name != "Admin-managed studio" || active != 0 {
+		t.Fatalf("stored gym edit overwritten: name=%q active=%d", name, active)
+	}
+	var quantity int
+	var status string
+	if err := service.db.QueryRowContext(ctx, `SELECT quantity,status FROM gym_equipment WHERE gym_id='gym_demo_jakarta_001' AND equipment_id='dumbbell'`).Scan(&quantity, &status); err != nil {
+		t.Fatal(err)
+	}
+	if quantity != 9 || status != "out_of_service" {
+		t.Fatalf("stored inventory edit overwritten: quantity=%d status=%q", quantity, status)
 	}
 }
 
