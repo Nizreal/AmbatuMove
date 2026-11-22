@@ -1,5 +1,21 @@
 # AmbatuMove
 
+## Mobile MVP (demo lokal)
+
+Aplikasi Expo Android berada di `mobile/`. Jalankan dari root:
+
+```sh
+cd mobile
+npm ci
+npm start
+```
+
+Pindai QR dengan Expo Go yang mendukung SDK 58, atau jalankan `npm run android` setelah emulator Android aktif. Pada Windows PowerShell gunakan `npm.cmd` bila wrapper skrip diblokir.
+
+Akun demo: `demo@ambatumove.app` / `Move123!` (tersedia juga lewat tombol **Isi akun demo**). Aplikasi memakai layanan mock lokal dan belum terhubung ke API di bawah. Katalog menyediakan 71 gerakan dengan 68 foto referensi offline; foto bersumber dari [Free Exercise DB](https://github.com/yuhonas/free-exercise-db) (Unlicense). Tiga gerakan kardio ringan memakai instruksi teks karena tidak memiliki gambar yang sesuai.
+
+Kalori ditampilkan sebagai estimasi berbasis MET, bobot referensi 70 kg, dan set yang dikonfirmasi. Gerakan repetisi memakai asumsi 3 detik per repetisi; gerakan bertimer memakai durasi target. Angka ini bukan hasil pengukuran medis.
+
 [English](README.en.md) | [PDF](README.pdf) | [Referensi API (PDF)](docs/api-reference.pdf) | [HTML](docs/api-reference.html)
 
 - API: https://nizdri.stei.fun/api/v1

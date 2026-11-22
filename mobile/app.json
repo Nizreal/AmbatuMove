@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "AmbatuMove",
+    "slug": "ambatumove",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/brand.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/brand.png",
+        "backgroundColor": "#2947B6"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "app.ambatumove.mobile",
+      "softwareKeyboardLayoutMode": "resize"
+    },
+    "web": {
+      "favicon": "./assets/brand.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-image",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Izinkan AmbatuMove menggunakan kamera untuk memindai barcode produk.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F5F8FF",
+          "image": "./assets/brand.png",
+          "imageWidth": 160
+        }
+      ]
+    ],
+    "scheme": "ambatumove"
+  }
+}
