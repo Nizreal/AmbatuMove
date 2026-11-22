@@ -49,3 +49,9 @@ CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath \
 CLI juga menyediakan `migrate`, `seed`, `healthcheck`, dan `schema-version`. Periksa versi skema sebelum rollback binary. Script deployment tidak memulihkan backup secara otomatis. `GOMEMLIMIT=180MiB` adalah target penggunaan memori runtime; batas container ditetapkan oleh Compose. Lihat [runbook](../docs/performance/AmbatuMove_STB_Deployment_and_Operations_Runbook_v1.1.md) untuk release dan pemulihan. STB produksi menggunakan port 18081.
 
 Parameter rekomendasi kalori dan skema API lainnya tersedia di [OpenAPI](../docs/openapi.yaml) dan [referensi API](../docs/api-reference.pdf).
+
+### P2 dan AI coach
+
+Migrasi 0005 menambahkan preset peralatan, log manual/koreksi, audit perubahan, revisi workout, ulasan gym dan moderasi, favorit, serta hitungan rate coach. Buat dan verifikasi backup sebelum memperbarui binary; rollback ke versi lama hanya aman bila versi skema dan kompatibilitas migrasi dipastikan—migrasi tidak dibatalkan otomatis.
+
+Gemini coach hanya aktif bila `AI_ENABLED=true` dan `GEMINI_API_KEY` diberikan melalui secret/environment file yang tidak dilacak. Nilai contoh tetap nonaktif dan kosong. Chat harus menyertakan persetujuan pemrosesan eksternal; riwayat percakapan tidak disimpan. Lihat [panduan operasional AI coach](../docs/ai-coach-operations.md). Password reset tetap nonaktif karena belum ada mailer yang aman dikonfigurasi.

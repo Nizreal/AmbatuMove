@@ -57,6 +57,33 @@ func registerSavedRoutes(mux *http.ServeMux, planner *planning.Service, programm
 		}
 		WriteSuccess(w, r, 200, item)
 	}))
+	mux.HandleFunc("GET /api/v1/workouts/{workout_id}/revisions", protect(func(w http.ResponseWriter, r *http.Request) {
+		limit, err := queryInt(r.URL.Query().Get("limit"), 20, 1, 100)
+		if err != nil {
+			WriteError(w, r, 400, "VALIDATION_ERROR", "limit must be between 1 and 100.", nil)
+			return
+		}
+		offset, err := queryInt(r.URL.Query().Get("offset"), 0, 0, 1000000)
+		if err != nil {
+			WriteError(w, r, 400, "VALIDATION_ERROR", "offset must be non-negative.", nil)
+			return
+		}
+		p, _ := bearerPrincipal(r, auth)
+		items, total, err := store.WorkoutRevisions(r.Context(), p.UserID, r.PathValue("workout_id"), limit, offset)
+		if errors.Is(err, saved.ErrNotFound) {
+			WriteError(w, r, 404, "RESOURCE_NOT_FOUND", "Workout was not found.", nil)
+			return
+		}
+		if errors.Is(err, saved.ErrVersion) {
+			WriteError(w, r, 400, "VALIDATION_ERROR", "Revision pagination is invalid.", nil)
+			return
+		}
+		if err != nil {
+			WriteError(w, r, 500, "INTERNAL_ERROR", "Workout revisions could not be loaded.", nil)
+			return
+		}
+		WritePaginated(w, r, items, limit, offset, total)
+	}))
 	mux.HandleFunc("PATCH /api/v1/workouts/{workout_id}", protect(func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
 			ExpectedVersion int    `json:"expected_version"`
@@ -81,7 +108,7 @@ func registerSavedRoutes(mux *http.ServeMux, planner *planning.Service, programm
 			return
 		}
 		v.Status = req.Status
-		updated, err := store.UpdateWorkout(r.Context(), p.UserID, id, v.Version, v)
+		updated, err := store.UpdateWorkout(r.Context(), p.UserID, id, v.Version, v, "metadata")
 		if errors.Is(err, saved.ErrVersion) {
 			WriteError(w, r, 412, "VERSION_CONFLICT", "Workout version has changed.", nil)
 			return
@@ -133,7 +160,7 @@ func registerSavedRoutes(mux *http.ServeMux, planner *planning.Service, programm
 			return
 		}
 		result.AdaptedWorkout.ID = current.ID
-		updated, err := store.UpdateWorkout(r.Context(), p.UserID, r.PathValue("workout_id"), current.Version, result.AdaptedWorkout)
+		updated, err := store.UpdateWorkout(r.Context(), p.UserID, r.PathValue("workout_id"), current.Version, result.AdaptedWorkout, "adaptation")
 		if errors.Is(err, saved.ErrVersion) {
 			WriteError(w, r, 412, "VERSION_CONFLICT", "Workout version has changed.", nil)
 			return
@@ -205,7 +232,7 @@ func registerSavedRoutes(mux *http.ServeMux, planner *planning.Service, programm
 				}
 			}
 		}
-		updated, err := store.UpdateWorkout(r.Context(), p.UserID, id, v.Version, v)
+		updated, err := store.UpdateWorkout(r.Context(), p.UserID, id, v.Version, v, "item_replacement")
 		if errors.Is(err, saved.ErrVersion) {
 			WriteError(w, r, 412, "VERSION_CONFLICT", "Workout version has changed.", nil)
 			return

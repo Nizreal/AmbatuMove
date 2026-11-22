@@ -49,3 +49,9 @@ CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath \
 The CLI also supports `migrate`, `seed`, `healthcheck` and `schema-version`. Use the schema version when assessing binary rollback. A backup is never automatically restored by the release deployment script. `GOMEMLIMIT=180MiB` is a soft runtime target; Compose enforces the hard container limit. See the [deployment runbook](../docs/performance/AmbatuMove_STB_Deployment_and_Operations_Runbook_v1.1.md) for release and recovery procedures. On the deployed STB, use port 18081.
 
 For the calorie recommendation query parameters and all other API schemas, see [OpenAPI](../docs/openapi.yaml) or the [API reference](../docs/api-reference.en.pdf).
+
+### P2 and AI coach
+
+Migration 0005 adds equipment presets, manual logs/corrections, audit history, workout revisions, gym reviews/moderation, favorites, and coach rate counters. Create and verify a database backup before upgrading the binary. Rolling back to an older binary requires checking schema and migration compatibility; migrations are not automatically reversed.
+
+Gemini coaching is enabled only when `AI_ENABLED=true` and `GEMINI_API_KEY` is supplied through a deployment secret or untracked environment file. The examples stay disabled with a blank key. Each request must include explicit external-processing consent; chat history is not persisted. See the [AI coach operations guide](../docs/ai-coach-operations.md). Password recovery remains disabled until a safe mail provider is configured.

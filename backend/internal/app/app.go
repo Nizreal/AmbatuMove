@@ -10,6 +10,7 @@ import (
 
 	"github.com/ambatumove/core/internal/calories"
 	"github.com/ambatumove/core/internal/catalog"
+	"github.com/ambatumove/core/internal/coach"
 	"github.com/ambatumove/core/internal/config"
 	"github.com/ambatumove/core/internal/gyms"
 	"github.com/ambatumove/core/internal/httpapi"
@@ -78,7 +79,12 @@ func New(ctx context.Context, cfg config.Config, logger *slog.Logger) (*Applicat
 	profileService := profiles.NewService(db)
 	savedService := saved.NewService(db)
 	trackingService := tracking.NewService(db)
-	return &Application{Config: cfg, Logger: logger, DB: db, Handler: httpapi.NewRouter(logger, db, httpapi.Dependencies{Catalog: catalogService, Planning: planningService, Programs: programService, Gyms: gymService, Calories: calorieService, Identity: identityService, Profiles: profileService, Saved: savedService, Tracking: trackingService, PublicRateLimitRPM: cfg.PublicRateLimitRPM, PartnerRateLimitRPM: cfg.PartnerRateLimitRPM, PlannerConcurrency: 2, PlannerMaxGeneration: time.Duration(cfg.PlannerMaxGenerationMS) * time.Millisecond, TrustedProxyCIDRs: cfg.TrustedProxyCIDRs, CORSAllowedOrigins: cfg.CORSAllowedOrigins})}, nil
+	var aiProvider coach.Provider
+	if cfg.AIEnabled && cfg.GeminiAPIKey != "" {
+		aiProvider = coach.NewGeminiClient(cfg.GeminiAPIKey, cfg.GeminiModel, time.Duration(cfg.AITimeoutSeconds)*time.Second)
+	}
+	coachService := coach.NewService(db, aiProvider, catalogService, profileService, savedService, coach.ServiceConfig{Enabled: cfg.AIEnabled, Timeout: time.Duration(cfg.AITimeoutSeconds) * time.Second, MaxOutputTokens: cfg.AIMaxOutputTokens, RateLimitRPM: cfg.AIRateLimitRPM, MaxConcurrent: cfg.AIMaxConcurrentRequests})
+	return &Application{Config: cfg, Logger: logger, DB: db, Handler: httpapi.NewRouter(logger, db, httpapi.Dependencies{Catalog: catalogService, Planning: planningService, Programs: programService, Gyms: gymService, Calories: calorieService, Identity: identityService, Profiles: profileService, Saved: savedService, Tracking: trackingService, Coach: coachService, PublicRateLimitRPM: cfg.PublicRateLimitRPM, PartnerRateLimitRPM: cfg.PartnerRateLimitRPM, PlannerConcurrency: 2, PlannerMaxGeneration: time.Duration(cfg.PlannerMaxGenerationMS) * time.Millisecond, TrustedProxyCIDRs: cfg.TrustedProxyCIDRs, CORSAllowedOrigins: cfg.CORSAllowedOrigins})}, nil
 }
 
 func (a *Application) Close() error {

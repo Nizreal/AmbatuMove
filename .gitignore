@@ -23,3 +23,9 @@ dist/
 coverage.out
 **/coverage.out
 **/.DS_Store
+/docs/performance
+checktask.md
+docs/superpowers/plans/2026-11-22-coach-safety-handling.md
+docs/superpowers/plans/2026-11-22-p2-coach-implementation.md
+docs/superpowers/plans/2026-11-22-reference-data-management.md
+task.md

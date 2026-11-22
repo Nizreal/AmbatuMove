@@ -32,13 +32,15 @@ type Facility struct {
 }
 
 type Summary struct {
-	ID                 string   `json:"id"`
-	Name               string   `json:"name"`
-	Address            Address  `json:"address"`
-	Location           Location `json:"location"`
-	VerificationStatus string   `json:"verification_status"`
-	SourceType         string   `json:"source_type"`
-	DistanceKm         *float64 `json:"distance_km,omitempty"`
+	ID                  string   `json:"id"`
+	Name                string   `json:"name"`
+	Address             Address  `json:"address"`
+	Location            Location `json:"location"`
+	VerificationStatus  string   `json:"verification_status"`
+	SourceType          string   `json:"source_type"`
+	DistanceKm          *float64 `json:"distance_km,omitempty"`
+	AverageRating       *float64 `json:"average_rating,omitempty"`
+	ApprovedReviewCount int      `json:"approved_review_count"`
 }
 
 type Gym struct {

@@ -20,6 +20,17 @@ var ErrVersion = errors.New("resource version conflict")
 type Service struct{ db *sql.DB }
 
 func NewService(db *sql.DB) *Service { return &Service{db: db} }
+
+type WorkoutRevision struct {
+	ID        string           `json:"id"`
+	WorkoutID string           `json:"workout_id"`
+	Version   int              `json:"version"`
+	Snapshot  planning.Session `json:"snapshot"`
+	Reason    string           `json:"reason"`
+	ActorID   string           `json:"actor_user_id"`
+	CreatedAt string           `json:"created_at"`
+}
+
 func (s *Service) SaveWorkout(ctx context.Context, userID string, v planning.Session) (planning.Session, error) {
 	id, err := newID()
 	if err != nil {
@@ -34,8 +45,19 @@ func (s *Service) SaveWorkout(ctx context.Context, userID string, v planning.Ses
 	if err != nil {
 		return v, err
 	}
-	_, err = s.db.ExecContext(ctx, `INSERT INTO workout_sessions(id,user_id,goal,workout_type,status,version,snapshot_json,created_at,updated_at) VALUES(?,?,?,?,'planned',1,?,?,?)`, id, userID, v.Goal, v.WorkoutType, string(raw), now.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano))
-	return v, err
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return v, err
+	}
+	defer tx.Rollback()
+	_, err = tx.ExecContext(ctx, `INSERT INTO workout_sessions(id,user_id,goal,workout_type,status,version,snapshot_json,created_at,updated_at) VALUES(?,?,?,?,'planned',1,?,?,?)`, id, userID, v.Goal, v.WorkoutType, string(raw), now.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano))
+	if err != nil {
+		return v, err
+	}
+	if err = s.insertWorkoutRevision(ctx, tx, userID, id, v, "baseline", now.Format(time.RFC3339Nano)); err != nil {
+		return v, err
+	}
+	return v, tx.Commit()
 }
 func (s *Service) GetWorkout(ctx context.Context, userID, id string) (planning.Session, error) {
 	var raw string
@@ -120,7 +142,7 @@ func (s *Service) ListWorkouts(ctx context.Context, userID string, limit, offset
 	}
 	return items, total, rows.Err()
 }
-func (s *Service) UpdateWorkout(ctx context.Context, userID, id string, expected int, v planning.Session) (planning.Session, error) {
+func (s *Service) UpdateWorkout(ctx context.Context, userID, id string, expected int, v planning.Session, reasons ...string) (planning.Session, error) {
 	v.Version = expected + 1
 	v.Saved = true
 	raw, err := json.Marshal(v)
@@ -128,17 +150,32 @@ func (s *Service) UpdateWorkout(ctx context.Context, userID, id string, expected
 		return v, err
 	}
 	now := time.Now().UTC().Format(time.RFC3339Nano)
-	result, err := s.db.ExecContext(ctx, "UPDATE workout_sessions SET version=?,status=?,snapshot_json=?,updated_at=? WHERE id=? AND user_id=? AND version=? AND deleted_at IS NULL AND status!='completed'", v.Version, v.Status, string(raw), now, id, userID, expected)
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return v, err
+	}
+	defer tx.Rollback()
+	result, err := tx.ExecContext(ctx, "UPDATE workout_sessions SET version=?,status=?,snapshot_json=?,updated_at=? WHERE id=? AND user_id=? AND version=? AND deleted_at IS NULL AND status!='completed'", v.Version, v.Status, string(raw), now, id, userID, expected)
 	if err != nil {
 		return v, err
 	}
 	n, _ := result.RowsAffected()
 	if n == 0 {
 		var exists int
-		if e := s.db.QueryRowContext(ctx, "SELECT 1 FROM workout_sessions WHERE id=? AND user_id=? AND deleted_at IS NULL", id, userID).Scan(&exists); e != nil {
+		if e := tx.QueryRowContext(ctx, "SELECT 1 FROM workout_sessions WHERE id=? AND user_id=? AND deleted_at IS NULL", id, userID).Scan(&exists); e != nil {
 			return v, ErrNotFound
 		}
 		return v, ErrVersion
+	}
+	reason := "update"
+	if len(reasons) > 0 && strings.TrimSpace(reasons[0]) != "" {
+		reason = reasons[0]
+	}
+	if err = s.insertWorkoutRevision(ctx, tx, userID, id, v, reason, now); err != nil {
+		return v, err
+	}
+	if err = tx.Commit(); err != nil {
+		return v, err
 	}
 	v.ID = &id
 	return v, nil
@@ -200,6 +237,9 @@ func (s *Service) SaveProgram(ctx context.Context, userID string, v programs.Pro
 			return v, e
 		}
 		if _, e = tx.ExecContext(ctx, `INSERT INTO workout_sessions(id,user_id,program_id,goal,workout_type,status,version,snapshot_json,created_at,updated_at) VALUES(?,?,?,?,?,'planned',1,?,?,?)`, *session.ID, userID, id, session.Goal, session.WorkoutType, string(sessionJSON), now.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano)); e != nil {
+			return v, e
+		}
+		if e = s.insertWorkoutRevision(ctx, tx, userID, *session.ID, *session, "baseline", now.Format(time.RFC3339Nano)); e != nil {
 			return v, e
 		}
 	}
@@ -299,11 +339,16 @@ func (s *Service) UpdateProgram(ctx context.Context, userID, id string, expected
 		}
 		session := *entry.Session
 		session.Saved = true
+		session.Version++
 		sessionJSON, e := json.Marshal(session)
 		if e != nil {
 			return v, e
 		}
-		if _, e = tx.ExecContext(ctx, "UPDATE workout_sessions SET version=version+1,status=?,snapshot_json=?,updated_at=? WHERE id=? AND user_id=? AND program_id=? AND status!='completed' AND deleted_at IS NULL", session.Status, string(sessionJSON), time.Now().UTC().Format(time.RFC3339Nano), *session.ID, userID, id); e != nil {
+		now := time.Now().UTC().Format(time.RFC3339Nano)
+		if _, e = tx.ExecContext(ctx, "UPDATE workout_sessions SET version=?,status=?,snapshot_json=?,updated_at=? WHERE id=? AND user_id=? AND program_id=? AND status!='completed' AND deleted_at IS NULL", session.Version, session.Status, string(sessionJSON), now, *session.ID, userID, id); e != nil {
+			return v, e
+		}
+		if e = s.insertWorkoutRevision(ctx, tx, userID, *session.ID, session, "program_update", now); e != nil {
 			return v, e
 		}
 	}

@@ -87,6 +87,20 @@ Health, readiness, catalogs, gym directory, calorie estimation, recommendations 
 
 ## API checks
 
+### P2 backend routes in source
+
+After deploying a backend release that includes migration 0005, the API also supports equipment presets, manual activity logging, optimistic log corrections with audit history, workout revisions, moderated gym reviews, gym favorites, and weekly/progression analytics. Private features require a user JWT; partner keys cannot access user data. Public review lists contain approved reviews only. See OpenAPI for contracts. Gemini coaching is optional and disabled by default; see the [coach operations guide](docs/ai-coach-operations.md). Do not assume these routes exist on the current production service until a new release has been manually deployed.
+
+```bash
+curl -fsS -X PUT "$BASE/api/v1/me/equipment" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H 'Content-Type: application/json' \
+  -d '{"equipment":["dumbbell","bodyweight"]}'
+curl -fsS -X POST "$BASE/api/v1/workout-logs/manual" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H 'Idempotency-Key: manual-demo-001' \
+  -H 'Content-Type: application/json' \
+  -d '{"status":"completed","started_at":"2026-11-21T10:00:00Z","finished_at":"2026-11-21T10:30:00Z","items":[{"exercise_id":"act_walk_outdoor","actual_duration_seconds":1800,"actual_distance_km":2.2}]}'
+```
+
 ```bash
 python scripts/smoke-test.py --base https://nizdri.stei.fun
 ```

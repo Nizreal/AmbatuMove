@@ -474,5 +474,5 @@ func timestampAfterNow(value string) bool {
 }
 
 func isUniqueError(err error) bool {
-	return strings.Contains(strings.ToLower(err.Error()), "unique constraint")
+	return err != nil && strings.Contains(strings.ToLower(err.Error()), "unique constraint")
 }

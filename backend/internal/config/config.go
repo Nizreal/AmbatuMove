@@ -10,22 +10,30 @@ import (
 )
 
 type Config struct {
-	AppEnv                 string
-	HTTPAddr               string
-	DatabasePath           string
-	LogLevel               string
-	JWTSigningKey          []byte
-	JWTIssuer              string
-	JWTAudience            string
-	PublicBaseURL          string
-	CORSAllowedOrigins     []string
-	PlannerMaxGenerationMS int
-	PublicRateLimitRPM     int
-	PartnerRateLimitRPM    int
-	ReferenceCacheEnabled  bool
-	GymCacheEnabled        bool
-	SeedSyntheticGyms      bool
-	TrustedProxyCIDRs      []string
+	AppEnv                  string
+	HTTPAddr                string
+	DatabasePath            string
+	LogLevel                string
+	JWTSigningKey           []byte
+	JWTIssuer               string
+	JWTAudience             string
+	PublicBaseURL           string
+	CORSAllowedOrigins      []string
+	PlannerMaxGenerationMS  int
+	PublicRateLimitRPM      int
+	PartnerRateLimitRPM     int
+	ReferenceCacheEnabled   bool
+	GymCacheEnabled         bool
+	SeedSyntheticGyms       bool
+	TrustedProxyCIDRs       []string
+	AIEnabled               bool
+	AIProvider              string
+	GeminiAPIKey            string
+	GeminiModel             string
+	AITimeoutSeconds        int
+	AIMaxOutputTokens       int
+	AIRateLimitRPM          int
+	AIMaxConcurrentRequests int
 }
 
 type lookupEnv func(string) (string, bool)
@@ -50,6 +58,10 @@ func Load(getenv lookupEnv) (Config, error) {
 		ReferenceCacheEnabled: boolValue(value("REFERENCE_CACHE_ENABLED", "true")),
 		GymCacheEnabled:       boolValue(value("GYM_CACHE_ENABLED", "true")),
 		SeedSyntheticGyms:     boolValue(value("SEED_SYNTHETIC_GYMS", "false")),
+		AIEnabled:             boolValue(value("AI_ENABLED", "false")),
+		AIProvider:            strings.ToLower(value("AI_PROVIDER", "gemini")),
+		GeminiAPIKey:          value("GEMINI_API_KEY", ""),
+		GeminiModel:           value("GEMINI_MODEL", "gemini-3.5-flash-lite"),
 	}
 	var err error
 	if cfg.PlannerMaxGenerationMS, err = intValue(value("PLANNER_MAX_GENERATION_MS", "1500"), "PLANNER_MAX_GENERATION_MS", 100, 10000); err != nil {
@@ -59,6 +71,18 @@ func Load(getenv lookupEnv) (Config, error) {
 		return Config{}, err
 	}
 	if cfg.PartnerRateLimitRPM, err = intValue(value("PARTNER_RATE_LIMIT_RPM", "120"), "PARTNER_RATE_LIMIT_RPM", 1, 1200); err != nil {
+		return Config{}, err
+	}
+	if cfg.AITimeoutSeconds, err = intValue(value("AI_TIMEOUT_SECONDS", "20"), "AI_TIMEOUT_SECONDS", 3, 60); err != nil {
+		return Config{}, err
+	}
+	if cfg.AIMaxOutputTokens, err = intValue(value("AI_MAX_OUTPUT_TOKENS", "512"), "AI_MAX_OUTPUT_TOKENS", 64, 2048); err != nil {
+		return Config{}, err
+	}
+	if cfg.AIRateLimitRPM, err = intValue(value("AI_RATE_LIMIT_RPM", "5"), "AI_RATE_LIMIT_RPM", 1, 60); err != nil {
+		return Config{}, err
+	}
+	if cfg.AIMaxConcurrentRequests, err = intValue(value("AI_MAX_CONCURRENT_REQUESTS", "1"), "AI_MAX_CONCURRENT_REQUESTS", 1, 4); err != nil {
 		return Config{}, err
 	}
 	if cfg.AppEnv != "development" && cfg.AppEnv != "test" && cfg.AppEnv != "production" {
@@ -72,6 +96,15 @@ func Load(getenv lookupEnv) (Config, error) {
 	}
 	if _, err := strconv.ParseBool(value("SEED_SYNTHETIC_GYMS", "false")); err != nil {
 		return Config{}, fmt.Errorf("SEED_SYNTHETIC_GYMS must be true or false")
+	}
+	if _, err := strconv.ParseBool(value("AI_ENABLED", "false")); err != nil {
+		return Config{}, fmt.Errorf("AI_ENABLED must be true or false")
+	}
+	if cfg.AIProvider != "gemini" {
+		return Config{}, fmt.Errorf("AI_PROVIDER must be gemini")
+	}
+	if len(cfg.GeminiModel) < 1 || len(cfg.GeminiModel) > 100 || strings.TrimSpace(cfg.GeminiModel) != cfg.GeminiModel || strings.ContainsAny(cfg.GeminiModel, "/\\?#") {
+		return Config{}, fmt.Errorf("GEMINI_MODEL is invalid")
 	}
 	if cfg.AppEnv == "production" && cfg.SeedSyntheticGyms {
 		return Config{}, fmt.Errorf("SEED_SYNTHETIC_GYMS is only allowed in development or test environments")
