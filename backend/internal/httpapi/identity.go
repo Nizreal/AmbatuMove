@@ -122,6 +122,39 @@ func registerIdentityRoutes(mux *http.ServeMux, service *identity.Service, profi
 		WriteSuccess(w, r, http.StatusOK, user)
 	}))
 	if profileService != nil {
+		mux.HandleFunc("GET /api/v1/me/equipment", authenticated(service, false, func(w http.ResponseWriter, r *http.Request) {
+			preset, err := profileService.GetEquipmentPreset(r.Context(), principalFrom(r.Context()).UserID)
+			if err != nil {
+				WriteError(w, r, http.StatusInternalServerError, "INTERNAL_ERROR", "The equipment preset could not be loaded.", nil)
+				return
+			}
+			WriteSuccess(w, r, http.StatusOK, preset)
+		}))
+		mux.HandleFunc("PUT /api/v1/me/equipment", authenticated(service, false, func(w http.ResponseWriter, r *http.Request) {
+			var request struct {
+				Equipment []string `json:"equipment"`
+			}
+			if !decodeJSON(w, r, 8<<10, &request) {
+				return
+			}
+			if request.Equipment == nil {
+				WriteError(w, r, http.StatusUnprocessableEntity, "VALIDATION_ERROR", "equipment must be an array, including [] to explicitly clear the preset.", nil)
+				return
+			}
+			if err := profileService.PutEquipmentPreset(r.Context(), principalFrom(r.Context()).UserID, request.Equipment); errors.Is(err, profiles.ErrInvalid) {
+				WriteError(w, r, http.StatusUnprocessableEntity, "VALIDATION_ERROR", "Equipment IDs must refer to active catalog equipment and contain at most 32 entries.", nil)
+				return
+			} else if err != nil {
+				WriteError(w, r, http.StatusInternalServerError, "INTERNAL_ERROR", "The equipment preset could not be saved.", nil)
+				return
+			}
+			preset, err := profileService.GetEquipmentPreset(r.Context(), principalFrom(r.Context()).UserID)
+			if err != nil {
+				WriteError(w, r, http.StatusInternalServerError, "INTERNAL_ERROR", "The equipment preset could not be loaded.", nil)
+				return
+			}
+			WriteSuccess(w, r, http.StatusOK, preset)
+		}))
 		mux.HandleFunc("GET /api/v1/me/fitness-profile", authenticated(service, false, func(w http.ResponseWriter, r *http.Request) {
 			profile, err := profileService.Get(r.Context(), principalFrom(r.Context()).UserID)
 			if err != nil {

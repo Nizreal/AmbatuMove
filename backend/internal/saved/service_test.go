@@ -43,6 +43,13 @@ func TestSavedWorkoutOwnershipVersionAndArchive(t *testing.T) {
 	if _, err = s.UpdateWorkout(context.Background(), "u1", *v.ID, 1, v); err != ErrVersion {
 		t.Fatalf("stale write error=%v", err)
 	}
+	revisions, total, err := s.WorkoutRevisions(context.Background(), "u1", *v.ID, 10, 0)
+	if err != nil || total != 2 || len(revisions) != 2 || revisions[0].Version != 1 || revisions[1].Version != 2 || revisions[0].Reason != "baseline" {
+		t.Fatalf("revisions=%+v total=%d err=%v", revisions, total, err)
+	}
+	if _, _, err = s.WorkoutRevisions(context.Background(), "u2", *v.ID, 10, 0); err != ErrNotFound {
+		t.Fatalf("foreign revision error=%v", err)
+	}
 	if err = s.ArchiveWorkout(context.Background(), "u1", *v.ID); err != nil {
 		t.Fatal(err)
 	}
