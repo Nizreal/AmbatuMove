@@ -16,6 +16,36 @@ func TestLoadUsesDevelopmentDefaults(t *testing.T) {
 	if got.SeedSyntheticGyms {
 		t.Fatal("synthetic gyms must be disabled by default")
 	}
+	if got.AIEnabled || got.AIProvider != "gemini" || got.GeminiModel != "gemini-3.5-flash-lite" || got.AIMaxConcurrentRequests != 1 {
+		t.Fatalf("unexpected AI defaults: %+v", got)
+	}
+}
+
+func TestAIConfigBoundsAndMissingKeyRemainNonFatal(t *testing.T) {
+	cfg, err := Load(func(key string) (string, bool) {
+		switch key {
+		case "AI_ENABLED":
+			return "true", true
+		case "GEMINI_API_KEY":
+			return "", true
+		default:
+			return "", false
+		}
+	})
+	if err != nil || !cfg.AIEnabled || cfg.GeminiAPIKey != "" {
+		t.Fatalf("missing optional provider key should not block startup: %+v err=%v", cfg, err)
+	}
+	for key, value := range map[string]string{"AI_TIMEOUT_SECONDS": "0", "AI_MAX_OUTPUT_TOKENS": "5000", "AI_RATE_LIMIT_RPM": "0", "AI_MAX_CONCURRENT_REQUESTS": "5", "AI_PROVIDER": "arbitrary", "GEMINI_MODEL": "../custom"} {
+		_, err = Load(func(name string) (string, bool) {
+			if name == key {
+				return value, true
+			}
+			return "", false
+		})
+		if err == nil {
+			t.Fatalf("invalid %s=%q was accepted", key, value)
+		}
+	}
 }
 
 func TestSyntheticGymSeedingRequiresExplicitNonProductionOptIn(t *testing.T) {

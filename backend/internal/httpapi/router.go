@@ -11,6 +11,7 @@ import (
 
 	"github.com/ambatumove/core/internal/calories"
 	"github.com/ambatumove/core/internal/catalog"
+	"github.com/ambatumove/core/internal/coach"
 	"github.com/ambatumove/core/internal/gyms"
 	"github.com/ambatumove/core/internal/identity"
 	"github.com/ambatumove/core/internal/planning"
@@ -39,6 +40,7 @@ type Dependencies struct {
 	PartnerRateLimitRPM  int
 	PlannerConcurrency   int
 	Tracking             *tracking.Service
+	Coach                *coach.Service
 	CORSAllowedOrigins   []string
 	TrustedProxyCIDRs    []string
 	PlannerMaxGeneration time.Duration
@@ -92,6 +94,9 @@ func NewRouter(logger *slog.Logger, database Pinger, dependencies ...Dependencie
 	}
 	if deps.Tracking != nil && deps.Identity != nil {
 		registerTrackingRoutes(mux, deps.Identity, deps.Tracking)
+	}
+	if deps.Coach != nil && deps.Identity != nil {
+		registerCoachRoutes(mux, deps.Identity, deps.Coach)
 	}
 	if deps.Identity != nil && deps.Catalog != nil && deps.Gyms != nil {
 		registerCacheStatsRoute(mux, deps.Identity, deps.Catalog, deps.Gyms)

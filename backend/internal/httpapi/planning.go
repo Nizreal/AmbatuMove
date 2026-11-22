@@ -32,6 +32,16 @@ func registerPlanningRoutes(mux *http.ServeMux, service *planning.Service, auth 
 				WriteError(w, r, 500, "INTERNAL_ERROR", "Fitness preferences could not be loaded.", nil)
 				return
 			}
+			if request.AvailableEquipment == nil {
+				preset, presetErr := profileService.GetEquipmentPreset(r.Context(), principal.UserID)
+				if presetErr != nil {
+					WriteError(w, r, 500, "INTERNAL_ERROR", "Equipment preferences could not be loaded.", nil)
+					return
+				}
+				if preset.Configured {
+					request.AvailableEquipment = preset.Equipment
+				}
+			}
 			applyWorkoutDefaults(&request, profile)
 		}
 		if request.Save && (auth == nil || savedService == nil) {
@@ -146,6 +156,16 @@ func registerProgramRoutes(mux *http.ServeMux, service *programs.Service, auth *
 			if profileErr != nil {
 				WriteError(w, r, 500, "INTERNAL_ERROR", "Fitness preferences could not be loaded.", nil)
 				return
+			}
+			if request.AvailableEquipment == nil {
+				preset, presetErr := profileService.GetEquipmentPreset(r.Context(), principal.UserID)
+				if presetErr != nil {
+					WriteError(w, r, 500, "INTERNAL_ERROR", "Equipment preferences could not be loaded.", nil)
+					return
+				}
+				if preset.Configured {
+					request.AvailableEquipment = preset.Equipment
+				}
 			}
 			applyProgramDefaults(&request, profile)
 		}

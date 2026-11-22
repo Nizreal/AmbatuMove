@@ -25,6 +25,452 @@
       }
     },
     "schemas": {
+        "P2EquipmentPreset": {
+          "type": "object",
+          "required": [
+            "configured",
+            "equipment"
+          ],
+          "properties": {
+            "configured": {
+              "type": "boolean",
+              "description": "False means never configured; true with [] means explicitly empty."
+            },
+            "equipment": {
+              "type": "array",
+              "maxItems": 32,
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "P2EquipmentPresetRequest": {
+          "type": "object",
+          "required": [
+            "equipment"
+          ],
+          "properties": {
+            "equipment": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "example": {
+            "equipment": [
+              "dumbbell",
+              "bodyweight"
+            ]
+          }
+        },
+        "P2ManualLogRequest": {
+          "type": "object",
+          "required": [
+            "status",
+            "started_at",
+            "finished_at"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "partial",
+                "skipped"
+              ]
+            },
+            "started_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "finished_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "items": {
+              "type": "array",
+              "minItems": 0,
+              "maxItems": 50,
+              "description": "Required for completed or partial logs; omitted or empty is allowed for skipped logs.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "exercise_id"
+                ],
+                "properties": {
+                  "exercise_id": {
+                    "type": "string"
+                  },
+                  "performed_sets": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/PerformedSet"
+                    }
+                  },
+                  "actual_duration_seconds": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 86400
+                  },
+                  "actual_distance_km": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1000
+                  },
+                  "perceived_effort": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "status": "completed",
+            "started_at": "2026-11-21T10:00:00Z",
+            "finished_at": "2026-11-21T10:40:00Z",
+            "items": [
+              {
+                "exercise_id": "ex_push_up",
+                "performed_sets": [
+                  {
+                    "reps": 12,
+                    "load_kg": 0
+                  }
+                ],
+                "perceived_effort": 6
+              },
+              {
+                "exercise_id": "act_walk_outdoor",
+                "actual_duration_seconds": 2400,
+                "actual_distance_km": 2.1,
+                "perceived_effort": 4
+              }
+            ]
+          }
+        },
+        "P2PerformedItem": {
+          "type": "object",
+          "required": ["exercise_id"],
+          "properties": {
+            "item_id": {"type": "string"},
+            "exercise_id": {"type": "string"},
+            "performed_sets": {"type": "array", "items": {"$ref": "#/components/schemas/PerformedSet"}},
+            "actual_duration_seconds": {"type": "integer", "minimum": 0, "maximum": 86400},
+            "actual_distance_km": {"type": "number", "minimum": 0, "maximum": 1000},
+            "perceived_effort": {"type": "integer", "minimum": 0, "maximum": 10}
+          }
+        },
+        "P2LogCorrectionRequest": {
+          "type": "object",
+          "required": [
+            "expected_version",
+            "reason"
+          ],
+          "properties": {
+            "expected_version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 500
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "partial",
+                "skipped"
+              ]
+            },
+            "started_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "finished_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "items": {
+              "type": "array",
+              "maxItems": 100,
+              "items": {
+                "$ref": "#/components/schemas/P2PerformedItem"
+              }
+            }
+          }
+        },
+        "P2GymReviewRequest": {
+          "type": "object",
+          "required": [
+            "rating"
+          ],
+          "properties": {
+            "rating": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "comment": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "example": {
+            "rating": 5,
+            "comment": "Helpful facilities."
+          }
+        },
+        "P2GymModerationRequest": {
+          "type": "object",
+          "required": [
+            "decision",
+            "reason"
+          ],
+          "properties": {
+            "decision": {
+              "type": "string",
+              "enum": [
+                "approved",
+                "rejected",
+                "hidden"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 500
+            }
+          }
+        },
+        "P2FavoriteGymRequest": {
+          "type": "object",
+          "required": [
+            "gym_id"
+          ],
+          "properties": {
+            "gym_id": {
+              "type": "string"
+            }
+          }
+        },
+        "P2Trends": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string",
+              "format": "date"
+            },
+            "to": {
+              "type": "string",
+              "format": "date"
+            },
+            "timezone": {
+              "type": "string"
+            },
+            "weeks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "week_start": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "completed_sessions": {
+                    "type": "integer"
+                  },
+                  "manual_activities": {
+                    "type": "integer"
+                  },
+                  "training_minutes": {
+                    "type": "integer"
+                  },
+                  "strength_volume_kg": {
+                    "type": "number"
+                  },
+                  "cardio_distance_km": {
+                    "type": "number"
+                  },
+                  "cardio_duration_minutes": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "P2Progression": {
+          "type": "object",
+          "properties": {
+            "lookback_days": {
+              "type": "integer"
+            },
+            "timezone": {
+              "type": "string"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "exercise_id": {
+                    "type": "string"
+                  },
+                  "metric": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "observations": {
+                    "type": "integer"
+                  },
+                  "baseline": {
+                    "type": "number"
+                  },
+                  "current": {
+                    "type": "number"
+                  },
+                  "change_percent": {
+                    "type": "number"
+                  },
+                  "suggestion": {
+                    "type": "string"
+                  },
+                  "reason_code": {
+                    "type": "string"
+                  },
+                  "explanation": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "P2CoachRequest": {
+          "type": "object",
+          "required": [
+            "message"
+          ],
+          "properties": {
+            "message": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "exercise_id": {
+              "type": "string"
+            },
+            "workout_id": {
+              "type": "string"
+            },
+            "previous_turns": {
+              "type": "array",
+              "maxItems": 6,
+              "items": {
+                "type": "object",
+                "required": [
+                  "role",
+                  "content"
+                ],
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "user",
+                      "assistant"
+                    ]
+                  },
+                  "content": {
+                    "type": "string",
+                    "maxLength": 1000
+                  }
+                }
+              }
+            },
+            "consent_external_processing": {
+              "type": "boolean",
+              "description": "Set true to allow external provider processing. Omit or set false for a local caution or urgent response; general coaching requires consent."
+            },
+            "include_profile_context": {
+              "type": "boolean"
+            },
+            "include_training_history": {
+              "type": "boolean"
+            }
+          },
+          "example": {
+            "message": "Why do I feel my biceps instead of my back?",
+            "exercise_id": "ex_lat_pulldown",
+            "consent_external_processing": true
+          }
+        },
+        "P2CoachResponse": {
+          "type": "object",
+          "required": [
+            "answer",
+            "safety_classification",
+            "suggested_actions",
+            "request_id",
+            "limitations"
+          ],
+          "properties": {
+            "answer": {
+              "type": "string"
+            },
+            "exercise": {
+              "type": "object"
+            },
+            "safety_classification": {
+              "type": "string",
+              "description": "general for non-symptom coaching, caution for current or contextual discomfort, urgent for current red-flag symptoms handled locally.",
+              "enum": [
+                "general",
+                "caution",
+                "urgent"
+              ]
+            },
+            "suggested_actions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "provider": {
+              "type": "string"
+            },
+            "model": {
+              "type": "string"
+            },
+            "request_id": {
+              "type": "string"
+            },
+            "limitations": {
+              "type": "string"
+            }
+          }
+        },
       "Success": {
         "type": "object",
         "required": [
@@ -2043,6 +2489,2758 @@
     }
   },
   "paths": {
+      "/me/equipment": {
+        "get": {
+          "operationId": "getEquipmentPreset",
+          "summary": "Get equipment preset",
+          "description": "JWT private data. configured=false means missing; configured=true with [] is explicitly empty.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "200": {
+              "description": "Request succeeded in a standard data/meta envelope.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data",
+                      "meta"
+                    ],
+                    "properties": {
+                      "data": {
+                        "$ref": "#/components/schemas/P2EquipmentPreset"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ]
+        },
+        "put": {
+          "operationId": "putEquipmentPreset",
+          "summary": "Replace equipment preset",
+          "description": "JWT private data. Atomic replacement, maximum 32 active equipment IDs; [] clears explicitly.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "200": {
+              "description": "Request succeeded in a standard data/meta envelope.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data",
+                      "meta"
+                    ],
+                    "properties": {
+                      "data": {
+                        "$ref": "#/components/schemas/P2EquipmentPreset"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/P2EquipmentPresetRequest"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/workout-logs/manual": {
+        "post": {
+          "operationId": "createManualWorkoutLog",
+          "summary": "Create manual activity log",
+          "description": "JWT only. Active canonical exercises and measurement-specific values are validated. Requires idempotency key length 8–128; same replay returns the log and changed replay conflicts. session_id is null.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "201": {
+              "description": "Request succeeded in a standard data/meta envelope.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data",
+                      "meta"
+                    ],
+                    "properties": {
+                      "data": {
+                        "$ref": "#/components/schemas/WorkoutLog"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "Idempotency-Key",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "minLength": 8,
+                "maxLength": 128
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/P2ManualLogRequest"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/workout-logs/{log_id}": {
+        "patch": {
+          "operationId": "correctWorkoutLog",
+          "summary": "Correct workout log",
+          "description": "JWT owner only. expected_version is optimistic concurrency; correction plus immutable before/after audit are atomic. Explicit null is rejected.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "200": {
+              "description": "Request succeeded in a standard data/meta envelope.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data",
+                      "meta"
+                    ],
+                    "properties": {
+                      "data": {
+                        "$ref": "#/components/schemas/WorkoutLog"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "log_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/P2LogCorrectionRequest"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/workout-logs/{log_id}/corrections": {
+        "get": {
+          "operationId": "listLogCorrections",
+          "summary": "List log corrections",
+          "description": "JWT owner only. Newest version first; limit 1–100 (default 20), offset 0–1,000,000.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "200": {
+              "description": "Request succeeded in a standard data/meta envelope.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data",
+                      "meta"
+                    ],
+                    "properties": {
+                      "data": {
+                        "$ref": "#/components/schemas/PaginatedResponse"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "log_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 20
+              }
+            },
+            {
+              "name": "offset",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000,
+                "default": 0
+              }
+            }
+          ]
+        }
+      },
+      "/workouts/{workout_id}/revisions": {
+        "get": {
+          "operationId": "listWorkoutRevisions",
+          "summary": "List workout revisions",
+          "description": "JWT owner only. Ordered version history; limit 1–100 (default 20), offset 0–1,000,000.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "200": {
+              "description": "Request succeeded in a standard data/meta envelope.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data",
+                      "meta"
+                    ],
+                    "properties": {
+                      "data": {
+                        "$ref": "#/components/schemas/PaginatedResponse"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "workout_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 20
+              }
+            },
+            {
+              "name": "offset",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000,
+                "default": 0
+              }
+            }
+          ]
+        }
+      },
+      "/gyms/{gym_id}/reviews": {
+        "get": {
+          "operationId": "listApprovedGymReviews",
+          "summary": "List approved gym reviews",
+          "description": "Public approved reviews only; limit 1–100, offset 0–1,000,000.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "200": {
+              "description": "Request succeeded in a standard data/meta envelope.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data",
+                      "meta"
+                    ],
+                    "properties": {
+                      "data": {
+                        "$ref": "#/components/schemas/PaginatedResponse"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "parameters": [
+            {
+              "name": "gym_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 20
+              }
+            },
+            {
+              "name": "offset",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000,
+                "default": 0
+              }
+            }
+          ]
+        },
+        "post": {
+          "operationId": "submitGymReview",
+          "summary": "Submit gym review",
+          "description": "JWT only. One per user/gym; pending reviews do not appear publicly or affect aggregates until approved.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "201": {
+              "description": "Request succeeded in a standard data/meta envelope.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data",
+                      "meta"
+                    ],
+                    "properties": {
+                      "data": {
+                        "$ref": "#/components/schemas/P2GymReview"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "gym_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/P2GymReviewRequest"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/me/favorite-gyms": {
+        "get": {
+          "operationId": "listFavoriteGyms",
+          "summary": "List favorite gyms",
+          "description": "JWT private data; active gyms only. limit 1–100, offset 0–1,000,000.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "200": {
+              "description": "Request succeeded in a standard data/meta envelope.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data",
+                      "meta"
+                    ],
+                    "properties": {
+                      "data": {
+                        "$ref": "#/components/schemas/PaginatedResponse"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 20
+              }
+            },
+            {
+              "name": "offset",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000,
+                "default": 0
+              }
+            }
+          ]
+        },
+        "post": {
+          "operationId": "addFavoriteGym",
+          "summary": "Add favorite gym",
+          "description": "JWT only; idempotent add, returns 204.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "204": {
+              "description": "No content."
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/P2FavoriteGymRequest"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/me/favorite-gyms/{gym_id}": {
+        "delete": {
+          "operationId": "removeFavoriteGym",
+          "summary": "Remove favorite gym",
+          "description": "JWT only; idempotent remove, returns 204.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "204": {
+              "description": "No content."
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "gym_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ]
+        }
+      },
+      "/admin/gym-reviews": {
+        "get": {
+          "operationId": "listGymReviewQueue",
+          "summary": "List gym review queue",
+          "description": "Administrator JWT. status defaults pending (pending/approved/rejected/hidden); limit 1–100, offset 0–1,000,000.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "200": {
+              "description": "Request succeeded in a standard data/meta envelope.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data",
+                      "meta"
+                    ],
+                    "properties": {
+                      "data": {
+                        "$ref": "#/components/schemas/PaginatedResponse"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "status",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "approved",
+                  "rejected",
+                  "hidden"
+                ],
+                "default": "pending"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 20
+              }
+            },
+            {
+              "name": "offset",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000,
+                "default": 0
+              }
+            }
+          ]
+        }
+      },
+      "/admin/gym-reviews/{review_id}/moderate": {
+        "post": {
+          "operationId": "moderateGymReview",
+          "summary": "Moderate gym review",
+          "description": "Administrator JWT; approve, reject, or hide with audit reason.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "200": {
+              "description": "Request succeeded in a standard data/meta envelope.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data",
+                      "meta"
+                    ],
+                    "properties": {
+                      "data": {
+                        "$ref": "#/components/schemas/Success"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "review_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/P2GymModerationRequest"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/me/progression": {
+        "get": {
+          "operationId": "getProgression",
+          "summary": "Get progression suggestions",
+          "description": "JWT private history. Deterministic suggestions; days 28–365 (default 90), limit 1–50 (default 20), at least six observations per exercise.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "200": {
+              "description": "Request succeeded in a standard data/meta envelope.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data",
+                      "meta"
+                    ],
+                    "properties": {
+                      "data": {
+                        "$ref": "#/components/schemas/P2Progression"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "days",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 28,
+                "maximum": 365,
+                "default": 90
+              }
+            },
+            {
+              "name": "exercise_id",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "maxLength": 80
+              }
+            },
+            {
+              "name": "timezone",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "maxLength": 100,
+                "default": "UTC"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 50,
+                "default": 20
+              }
+            }
+          ]
+        }
+      },
+      "/stats/trends": {
+        "get": {
+          "operationId": "getActivityTrends",
+          "summary": "Get activity trends",
+          "description": "JWT private history, bounded weekly totals grouped in IANA timezone; days 7–365 (default 90).",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "200": {
+              "description": "Request succeeded in a standard data/meta envelope.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data",
+                      "meta"
+                    ],
+                    "properties": {
+                      "data": {
+                        "$ref": "#/components/schemas/P2Trends"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "days",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 7,
+                "maximum": 365,
+                "default": 90
+              }
+            },
+            {
+              "name": "timezone",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "maxLength": 100,
+                "default": "UTC"
+              }
+            }
+          ]
+        }
+      },
+      "/coach/chat": {
+        "post": {
+          "operationId": "chatWithExerciseCoach",
+          "summary": "Chat with exercise coach",
+          "description": "JWT only; partner API keys are not allowed. Set consent_external_processing=true before any request can reach Gemini. Current discomfort (caution) uses Gemini only with consent and always includes deterministic safety advice; without consent or provider availability it uses a local safety response. Current red-flag symptoms (urgent) are answered locally and never sent to Gemini, regardless of consent. General questions without consent return 422. Transcripts are not persisted. Gemini is disabled by default. General information, not medical advice.",
+          "tags": [
+            "P2"
+          ],
+          "responses": {
+            "200": {
+              "description": "Request succeeded in a standard data/meta envelope.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data",
+                      "meta"
+                    ],
+                    "properties": {
+                      "data": {
+                        "$ref": "#/components/schemas/P2CoachResponse"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request or query parameters.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Authentication required or credentials invalid.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Administrator permission required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Resource not found or not owned.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Duplicate, conflict, or idempotency mismatch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "412": {
+              "description": "Version is stale.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Bounded history limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation or consent failed.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "429": {
+              "description": "Rate or concurrency limit exceeded.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Unexpected internal error.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "503": {
+              "description": "AI provider disabled or unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/P2CoachRequest"
+                }
+              }
+            }
+          }
+        }
+      },
     "/health": {
       "get": {
         "summary": "Liveness",

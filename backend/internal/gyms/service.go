@@ -204,6 +204,10 @@ func (s *Service) Get(ctx context.Context, id string) (Gym, error) {
 	if err != nil {
 		return Gym{}, err
 	}
+	result.Summary.AverageRating, result.Summary.ApprovedReviewCount, err = s.ApprovedRating(ctx, id)
+	if err != nil {
+		return Gym{}, err
+	}
 	s.cache.put("gym:"+id, result)
 	return result, nil
 }

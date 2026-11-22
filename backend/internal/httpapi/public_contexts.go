@@ -89,6 +89,28 @@ func registerGymRoutes(mux *http.ServeMux, service *gyms.Service, auth *identity
 		}
 		WriteSuccess(w, r, http.StatusOK, items)
 	})
+	mux.HandleFunc("GET /api/v1/gyms/{gym_id}/reviews", func(w http.ResponseWriter, r *http.Request) {
+		limit, err := queryInt(r.URL.Query().Get("limit"), 20, 1, 100)
+		if err != nil {
+			WriteError(w, r, 400, "VALIDATION_ERROR", "limit must be between 1 and 100.", nil)
+			return
+		}
+		offset, err := queryInt(r.URL.Query().Get("offset"), 0, 0, 1000000)
+		if err != nil {
+			WriteError(w, r, 400, "VALIDATION_ERROR", "offset must be non-negative.", nil)
+			return
+		}
+		items, total, err := service.ListApprovedReviews(r.Context(), r.PathValue("gym_id"), limit, offset)
+		if errors.Is(err, gyms.ErrNotFound) {
+			WriteError(w, r, 404, "RESOURCE_NOT_FOUND", "Gym was not found.", nil)
+			return
+		}
+		if err != nil {
+			WriteError(w, r, 500, "INTERNAL_ERROR", "Gym reviews could not be loaded.", nil)
+			return
+		}
+		WritePaginated(w, r, items, limit, offset, total)
+	})
 	mux.HandleFunc("GET /api/v1/facilities", func(w http.ResponseWriter, r *http.Request) {
 		items, err := service.ListFacilities(r.Context())
 		if err != nil {
@@ -98,6 +120,80 @@ func registerGymRoutes(mux *http.ServeMux, service *gyms.Service, auth *identity
 		WriteSuccess(w, r, http.StatusOK, items)
 	})
 	if auth != nil {
+		mux.HandleFunc("POST /api/v1/gyms/{gym_id}/reviews", authenticated(auth, false, func(w http.ResponseWriter, r *http.Request) {
+			var req struct {
+				Rating  int    `json:"rating"`
+				Comment string `json:"comment"`
+			}
+			if !decodeJSON(w, r, 8<<10, &req) {
+				return
+			}
+			p, _ := bearerPrincipal(r, auth)
+			item, err := service.SubmitReview(r.Context(), p.UserID, r.PathValue("gym_id"), req.Rating, req.Comment)
+			if errors.Is(err, gyms.ErrReviewInvalid) {
+				WriteError(w, r, 422, "VALIDATION_ERROR", "Rating or comment is invalid.", nil)
+				return
+			}
+			if errors.Is(err, gyms.ErrReviewConflict) {
+				WriteError(w, r, 409, "DUPLICATE_REVIEW", "A review already exists for this user and gym.", nil)
+				return
+			}
+			if errors.Is(err, gyms.ErrNotFound) {
+				WriteError(w, r, 404, "RESOURCE_NOT_FOUND", "Gym was not found.", nil)
+				return
+			}
+			if err != nil {
+				WriteError(w, r, 500, "INTERNAL_ERROR", "Gym review could not be submitted.", nil)
+				return
+			}
+			WriteSuccess(w, r, 201, item)
+		}))
+		mux.HandleFunc("POST /api/v1/me/favorite-gyms", authenticated(auth, false, func(w http.ResponseWriter, r *http.Request) {
+			var req struct {
+				GymID string `json:"gym_id"`
+			}
+			if !decodeJSON(w, r, 4096, &req) {
+				return
+			}
+			p, _ := bearerPrincipal(r, auth)
+			err := service.AddFavorite(r.Context(), p.UserID, req.GymID)
+			if errors.Is(err, gyms.ErrNotFound) {
+				WriteError(w, r, 404, "RESOURCE_NOT_FOUND", "Gym was not found.", nil)
+				return
+			}
+			if err != nil {
+				WriteError(w, r, 500, "INTERNAL_ERROR", "Gym could not be favorited.", nil)
+				return
+			}
+			w.WriteHeader(http.StatusNoContent)
+		}))
+		mux.HandleFunc("GET /api/v1/me/favorite-gyms", authenticated(auth, false, func(w http.ResponseWriter, r *http.Request) {
+			limit, err := queryInt(r.URL.Query().Get("limit"), 20, 1, 100)
+			if err != nil {
+				WriteError(w, r, 400, "VALIDATION_ERROR", "limit must be between 1 and 100.", nil)
+				return
+			}
+			offset, err := queryInt(r.URL.Query().Get("offset"), 0, 0, 1000000)
+			if err != nil {
+				WriteError(w, r, 400, "VALIDATION_ERROR", "offset must be non-negative.", nil)
+				return
+			}
+			p, _ := bearerPrincipal(r, auth)
+			items, total, err := service.ListFavorites(r.Context(), p.UserID, limit, offset)
+			if err != nil {
+				WriteError(w, r, 500, "INTERNAL_ERROR", "Favorite gyms could not be loaded.", nil)
+				return
+			}
+			WritePaginated(w, r, items, limit, offset, total)
+		}))
+		mux.HandleFunc("DELETE /api/v1/me/favorite-gyms/{gym_id}", authenticated(auth, false, func(w http.ResponseWriter, r *http.Request) {
+			p, _ := bearerPrincipal(r, auth)
+			if err := service.RemoveFavorite(r.Context(), p.UserID, r.PathValue("gym_id")); err != nil {
+				WriteError(w, r, 500, "INTERNAL_ERROR", "Favorite could not be removed.", nil)
+				return
+			}
+			w.WriteHeader(http.StatusNoContent)
+		}))
 		mux.HandleFunc("POST /api/v1/gyms/submissions", authenticated(auth, false, func(w http.ResponseWriter, r *http.Request) {
 			var req struct {
 				GymID    string         `json:"gym_id"`
@@ -153,6 +249,65 @@ func registerGymRoutes(mux *http.ServeMux, service *gyms.Service, auth *identity
 				return
 			}
 			WriteSuccess(w, r, 200, items)
+		}))
+		mux.HandleFunc("GET /api/v1/admin/gym-reviews", authenticated(auth, true, func(w http.ResponseWriter, r *http.Request) {
+			status := r.URL.Query().Get("status")
+			if status == "" {
+				status = "pending"
+			}
+			limit, err := queryInt(r.URL.Query().Get("limit"), 20, 1, 100)
+			if err != nil {
+				WriteError(w, r, 400, "VALIDATION_ERROR", "limit must be between 1 and 100.", nil)
+				return
+			}
+			offset, err := queryInt(r.URL.Query().Get("offset"), 0, 0, 1000000)
+			if err != nil {
+				WriteError(w, r, 400, "VALIDATION_ERROR", "offset must be non-negative.", nil)
+				return
+			}
+			p, _ := bearerPrincipal(r, auth)
+			items, total, err := service.ListReviewModeration(r.Context(), p.UserID, status, limit, offset)
+			if errors.Is(err, gyms.ErrReviewInvalid) {
+				WriteError(w, r, 400, "VALIDATION_ERROR", "Review status or pagination is invalid.", nil)
+				return
+			}
+			if err != nil {
+				WriteError(w, r, 500, "INTERNAL_ERROR", "Review queue could not be loaded.", nil)
+				return
+			}
+			WritePaginated(w, r, items, limit, offset, total)
+		}))
+		mux.HandleFunc("POST /api/v1/admin/gym-reviews/{review_id}/moderate", authenticated(auth, true, func(w http.ResponseWriter, r *http.Request) {
+			var req struct {
+				Decision string `json:"decision"`
+				Reason   string `json:"reason"`
+			}
+			if !decodeJSON(w, r, 4096, &req) {
+				return
+			}
+			p, _ := bearerPrincipal(r, auth)
+			err := service.ModerateReview(r.Context(), p.UserID, r.PathValue("review_id"), req.Decision, req.Reason)
+			if errors.Is(err, gyms.ErrReviewNotFound) {
+				WriteError(w, r, 404, "RESOURCE_NOT_FOUND", "Review was not found.", nil)
+				return
+			}
+			if errors.Is(err, gyms.ErrReviewInvalid) {
+				WriteError(w, r, 422, "VALIDATION_ERROR", "Moderation decision or reason is invalid.", nil)
+				return
+			}
+			if errors.Is(err, gyms.ErrReviewForbidden) {
+				WriteError(w, r, 403, "FORBIDDEN", "Administrator access is required.", nil)
+				return
+			}
+			if errors.Is(err, gyms.ErrReviewConflict) {
+				WriteError(w, r, 409, "VERSION_CONFLICT", "Review already has this moderation state.", nil)
+				return
+			}
+			if err != nil {
+				WriteError(w, r, 500, "INTERNAL_ERROR", "Review could not be moderated.", nil)
+				return
+			}
+			WriteSuccess(w, r, 200, map[string]string{"status": req.Decision})
 		}))
 		mux.HandleFunc("POST /api/v1/admin/gym-submissions/{submission_id}/review", authenticated(auth, true, func(w http.ResponseWriter, r *http.Request) {
 			var req struct {

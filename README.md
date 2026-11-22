@@ -87,6 +87,22 @@ Health, readiness, katalog, direktori gym, estimasi kalori, rekomendasi kalori, 
 
 ## Uji API
 
+### Fitur P2 backend yang tersedia di source
+
+Setelah rilis backend yang menyertakan migrasi 0005, API juga menyediakan preset peralatan, pencatatan manual, koreksi log dengan audit/version, riwayat revisi latihan, ulasan gym yang dimoderasi, favorit gym, dan analitik progres mingguan. Fitur privat memerlukan JWT pengguna; API key mitra tidak dapat membaca data pengguna. Ulasan publik hanya menampilkan ulasan yang disetujui. Lihat OpenAPI untuk kontrak. Fitur coach Gemini bersifat opsional dan nonaktif secara default; lihat [panduan operasional coach](docs/ai-coach-operations.md). Jangan menganggap rute P2 sudah ada di layanan produksi sampai versi release baru diterapkan secara manual.
+
+Contoh permintaan privat (ganti token dengan JWT pengguna):
+
+```bash
+curl -fsS -X PUT "$BASE/api/v1/me/equipment" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H 'Content-Type: application/json' \
+  -d '{"equipment":["dumbbell","bodyweight"]}'
+curl -fsS -X POST "$BASE/api/v1/workout-logs/manual" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" -H 'Idempotency-Key: manual-demo-001' \
+  -H 'Content-Type: application/json' \
+  -d '{"status":"completed","started_at":"2026-11-21T10:00:00Z","finished_at":"2026-11-21T10:30:00Z","items":[{"exercise_id":"act_walk_outdoor","actual_duration_seconds":1800,"actual_distance_km":2.2}]}'
+```
+
 ```bash
 python scripts/smoke-test.py --base https://nizdri.stei.fun
 ```
