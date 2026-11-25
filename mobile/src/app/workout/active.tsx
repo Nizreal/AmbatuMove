@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { Alert } from "../../components/confirm";
 import { Redirect, router, usePreventRemove } from "expo-router";
@@ -14,10 +14,23 @@ import {
 } from "../../domain/workout";
 import { colors } from "../../theme";
 export default function Active() {
-  const s = useStore(),
-    [index, setIndex] = useState(0),
-    [leaving, setLeaving] = useState(false);
-  const session = s.active;
+  const s = useStore();
+  const { active, setActive } = s;
+  const session = active;
+  const [index, setIndex] = useState(() => Math.max(0, active?.actual.findIndex((row) => row.some((status) => status === "pending")) ?? 0));
+  const [leaving, setLeaving] = useState(false);
+  const [restRemaining, setRestRemaining] = useState(0);
+  useEffect(() => {
+    if (!session?.restUntil) return;
+    const update = () => {
+      const remaining = Math.max(0, Math.ceil((session.restUntil! - Date.now()) / 1000));
+      setRestRemaining(remaining);
+      if (remaining === 0 && session.restUntil) setActive({ ...session, restUntil: undefined });
+    };
+    const initialTick = setTimeout(update, 0);
+    const interval = setInterval(update, 1000);
+    return () => { clearTimeout(initialTick); clearInterval(interval); };
+  }, [session, setActive]);
   const disablePrevention = usePreventRemove(
     !!session && !session.finishedAt && !leaving,
     ({ repeat }) => {
@@ -56,7 +69,7 @@ export default function Active() {
       item,
       actual.filter((status) => status === "completed").length,
     ),
-    next = actual.findIndex((v) => v !== "completed");
+    next = actual.findIndex((v) => v === "pending");
   function finishSession() {
     Alert.alert(
       "Akhiri sesi latihan?",
@@ -80,15 +93,24 @@ export default function Active() {
       footer={
         <Button
           title={
-            next < 0
+            restRemaining > 0
+              ? "Istirahat sebentar"
+              : next < 0
               ? current < session.plan.items.length - 1
                 ? "Gerakan berikutnya"
                 : "Selesaikan latihan"
               : `Selesaikan set ${next + 1}`
           }
+          disabled={restRemaining > 0}
           onPress={() => {
-            if (next >= 0)
-              s.setActive(mark(session, current, next, "completed"));
+            if (next >= 0) {
+              const updated = mark(session, current, next, "completed");
+              const morePending = updated.actual[current].some((value) => value === "pending");
+              s.setActive({
+                ...updated,
+                restUntil: morePending && item.rest > 0 ? Date.now() + item.rest * 1000 : undefined,
+              });
+            }
             else if (current < session.plan.items.length - 1)
               setIndex(current + 1);
             else finishSession();
@@ -145,6 +167,15 @@ export default function Active() {
           <Txt variant="heading">{item.sets} set</Txt>
         </View>
       </View>
+      {restRemaining > 0 && (
+        <View style={styles.restPanel}>
+          <Txt variant="small" color={colors.muted}>Waktu istirahat</Txt>
+          <Txt variant="timer">
+            {String(Math.floor(restRemaining / 60)).padStart(2, "0")}:{String(restRemaining % 60).padStart(2, "0")}
+          </Txt>
+          <Button secondary title="Lewati jeda" onPress={() => { setRestRemaining(0); s.setActive({ ...session, restUntil: undefined }); }} />
+        </View>
+      )}
       <Txt variant="small" color={colors.muted}>
         Perkiraan lokal: ≈ {movementCalories} kcal (acuan{" "}
         {CALORIE_REFERENCE_WEIGHT_KG} kg; bukan estimasi server)

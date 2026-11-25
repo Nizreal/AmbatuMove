@@ -36,6 +36,8 @@ export type PlanItem = {
   sets: number;
   target: number;
   rest: number;
+  /** API workout item identifier; absent for manual or locally edited plans. */
+  backendItemId?: string;
 };
 export type Plan = {
   id: string;
@@ -47,6 +49,7 @@ export type Plan = {
   backendWorkoutId?: string | null;
   backendVersion?: number;
   backendEstimatedDurationSeconds?: number;
+  backendSeed?: number;
   warnings?: string[];
 };
 export type SetStatus = "pending" | "completed" | "skipped";
@@ -58,6 +61,7 @@ export type Session = {
   finishedAt?: string;
   outcome?: "completed" | "partial";
   savedAt?: string;
+  restUntil?: number;
 };
 export const CALORIE_REFERENCE_WEIGHT_KG = 70;
 const muscleMet: Record<Muscle, number> = {

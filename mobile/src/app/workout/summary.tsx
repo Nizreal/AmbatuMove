@@ -36,8 +36,8 @@ export default function Summary() {
       <Notice
         message={
           saved
-            ? "Hasil tersimpan di perangkat."
-            : "Simpan hasil untuk menambahkannya ke riwayat."
+            ? "Hasil workout tersimpan di akun AmbatuMove."
+            : "Simpan hasil untuk mencatat sesi pada riwayat akun."
         }
       />
       {!saved ? (

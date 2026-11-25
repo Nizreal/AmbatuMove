@@ -31,7 +31,9 @@ export function Screen({
   children,
   footer,
   standalone = false,
-}: PropsWithChildren<{ footer?: React.ReactNode; standalone?: boolean }>) {
+  scrollViewRef,
+  onContentSizeChange,
+}: PropsWithChildren<{ footer?: React.ReactNode; standalone?: boolean; scrollViewRef?: React.Ref<React.ComponentRef<typeof ScrollView>>; onContentSizeChange?: (width: number, height: number) => void }>) {
   const insets = useSafeAreaInsets();
   return (
     <KeyboardAvoidingView
@@ -39,6 +41,8 @@ export function Screen({
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
+        ref={scrollViewRef}
+        onContentSizeChange={onContentSizeChange}
         keyboardShouldPersistTaps="handled"
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={[
@@ -440,6 +444,15 @@ export const styles = StyleSheet.create({
     padding: space.md,
     borderWidth: 1,
     borderColor: colors.border,
+  },
+  restPanel: {
+    alignItems: "center",
+    gap: space.sm,
+    padding: space.lg,
+    backgroundColor: colors.accentSoft,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.accent,
   },
   caloriePanel: {
     minHeight: 72,

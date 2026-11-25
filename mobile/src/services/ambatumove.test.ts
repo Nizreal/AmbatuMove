@@ -2,12 +2,15 @@ import { defaults, Exercise } from "../domain/workout";
 import {
   API_CLIENT_BASES,
   ApiError,
+  chatWithCoach,
   describeApiError,
   generateWorkout,
+  getCurrentUser,
   getExercises,
   getGymEquipment,
   getGyms,
-  getProfessionals,
+  getProgression,
+  loginApi,
   mapExercise,
   resolveApiBase,
 } from "./ambatumove";
@@ -23,6 +26,28 @@ const response = (payload: unknown, status = 200) =>
 beforeEach(() => {
   jest.restoreAllMocks();
   jest.spyOn(console, "info").mockImplementation(() => {});
+});
+
+test("coach sends authenticated consent and bounded multi-turn context, then parses the backend answer", async () => {
+  const fetchMock = jest.spyOn(globalThis, "fetch").mockResolvedValue(response({
+    data: { answer: "Keep your wrists stacked under your shoulders.", safety_classification: "general", suggested_actions: ["Try a slower rep"], request_id: "req-coach-1", limitations: "General education only." },
+    meta: { request_id: "req-coach-1" },
+  }));
+  const history = Array.from({ length: 8 }, (_, index) => ({ role: index % 2 ? "assistant" as const : "user" as const, content: `${index}:${"x".repeat(1100)}` }));
+  await expect(chatWithCoach("secret-access-token", "  How do I do a push-up?  ", true, history)).resolves.toMatchObject({
+    answer: "Keep your wrists stacked under your shoulders.",
+    safety_classification: "general",
+  });
+  const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+  expect(url).toBe(`${API_CLIENT_BASES.ambatumove}/coach/chat`);
+  expect(new Headers(init.headers).get("authorization")).toBe("Bearer secret-access-token");
+  const sent = JSON.parse(String(init.body));
+  expect(sent.message).toBe("How do I do a push-up?");
+  expect(sent.consent_external_processing).toBe(true);
+  expect(sent.previous_turns).toHaveLength(6);
+  expect(sent.previous_turns.every((turn: { content: string }) => turn.content.length <= 1000)).toBe(true);
+  expect(sent.include_profile_context).toBe(false);
+  expect(sent.include_training_history).toBe(false);
 });
 
 test("catalog data keeps canonical exercise and equipment IDs", () => {
@@ -82,7 +107,7 @@ test("native development defaults to deployed HTTPS and web development uses its
   ).toBe("https://staging.example/api/v1");
 });
 
-test("workout generation sends a non-persisting request and maps API item IDs", async () => {
+test("workout generation saves an authenticated workout and maps API item IDs", async () => {
   const mapped: Exercise = mapExercise({
     id: "ex_bird_dog",
     name: "Bird Dog",
@@ -97,8 +122,8 @@ test("workout generation sends a non-persisting request and maps API item IDs", 
   const fetchMock = jest.spyOn(globalThis, "fetch").mockResolvedValue(
     response({
       data: {
-        id: null,
-        saved: false,
+        id: "workout_01",
+        saved: true,
         version: 1,
         goal: "general_fitness",
         constraints: { environment: "home" },
@@ -119,7 +144,7 @@ test("workout generation sends a non-persisting request and maps API item IDs", 
     }),
   );
   try {
-    const plan = await generateWorkout(defaults, [mapped]);
+    const plan = await generateWorkout(defaults, [mapped], "access-token");
     const [url, init] = fetchMock.mock.calls[0] as unknown as [
       string,
       RequestInit,
@@ -129,13 +154,14 @@ test("workout generation sends a non-persisting request and maps API item IDs", 
     expect(new Headers(init.headers).get("content-type")).toBe(
       "application/json",
     );
+    expect(new Headers(init.headers).get("authorization")).toBe("Bearer access-token");
     expect(JSON.parse(String(init.body))).toMatchObject({
-      save: false,
+      save: true,
       available_equipment: ["bodyweight"],
     });
     expect(plan.items[0].exercise.id).toBe("ex_bird_dog");
-    expect(plan.items[0]).toMatchObject({ sets: 3, target: 10, rest: 45 });
-    expect(plan.backendWorkoutId).toBeNull();
+    expect(plan.items[0]).toMatchObject({ sets: 3, target: 10, rest: 45, backendItemId: "wi_01" });
+    expect(plan.backendWorkoutId).toBe("workout_01");
   } finally {
     fetchMock.mockRestore();
   }
@@ -156,8 +182,8 @@ test("gym preview sends the canonical gym ID and inventory mode", async () => {
   const fetchMock = jest.spyOn(globalThis, "fetch").mockResolvedValue(
     response({
       data: {
-        id: null,
-        saved: false,
+        id: "gym_workout_01",
+        saved: true,
         version: 1,
         goal: "strength",
         constraints: { environment: "gym" },
@@ -188,6 +214,7 @@ test("gym preview sends the canonical gym ID and inventory mode", async () => {
         equipmentSource: "gym_inventory",
       },
       [exercise],
+      "access-token",
     );
     const [, init] = fetchMock.mock.calls[0] as unknown as [
       string,
@@ -198,7 +225,7 @@ test("gym preview sends the canonical gym ID and inventory mode", async () => {
       gym_id: "gym_bandung_anytime_summarecon",
       equipment_source: "gym_inventory",
       available_equipment: [],
-      save: false,
+      save: true,
     });
   } finally {
     fetchMock.mockRestore();
@@ -269,30 +296,94 @@ test("gym and gym inventory clients call the canonical endpoints", async () => {
   ]);
 });
 
-test("AmbatuFit directory uses the configured service client", async () => {
+test("concurrent gym inventory lookups share one request and cache its response", async () => {
   const fetchMock = jest.spyOn(globalThis, "fetch").mockResolvedValue(
-    response({
-      items: [
-        {
-          id: "professional_1",
-          display_name: "Demo Professional",
-          specialty: "doctor",
-          is_active: true,
-        },
-      ],
-    }),
+    response({ data: [{ equipment_id: "dedupe_dumbbell", label: "Dumbbell" }] }),
   );
-  await expect(getProfessionals()).resolves.toEqual([
-    {
-      id: "professional_1",
-      displayName: "Demo Professional",
-      specialty: "doctor",
-      description: undefined,
-    },
+  const gymId = "gym_deduplication_test";
+  const [first, second] = await Promise.all([
+    getGymEquipment(gymId),
+    getGymEquipment(gymId),
   ]);
+  const cached = await getGymEquipment(gymId);
+  expect(first).toEqual(second);
+  expect(cached).toEqual(first);
+  expect(fetchMock).toHaveBeenCalledTimes(1);
   expect(fetchMock.mock.calls[0][0]).toBe(
-    `${API_CLIENT_BASES.ambatufit}/professionals`,
+    `${API_CLIENT_BASES.ambatumove}/gyms/${gymId}/equipment`,
   );
+});
+
+test("concurrent progression lookups for the same session share one request", async () => {
+  const fetchMock = jest.spyOn(globalThis, "fetch").mockResolvedValue(
+    response({ data: { lookback_days: 90, items: [] } }),
+  );
+  const [first, second] = await Promise.all([
+    getProgression("progression-dedupe-token", "Asia/Jakarta"),
+    getProgression("progression-dedupe-token", "Asia/Jakarta"),
+  ]);
+  expect(first).toEqual(second);
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+  expect(fetchMock.mock.calls[0][0]).toBe(
+    `${API_CLIENT_BASES.ambatumove}/me/progression?days=90&limit=20&timezone=Asia%2FJakarta`,
+  );
+});
+
+test("workout generation preserves gym constraints and reports an unfeasible backend response", async () => {
+  const fetchMock = jest.spyOn(globalThis, "fetch").mockResolvedValue(
+    response({ error: { code: "UNFEASIBLE_PLAN", message: "No compatible exercises." } }, 422),
+  );
+  const constraints = {
+    ...defaults,
+    goal: "strength" as const,
+    focus: "upper",
+    experience: "intermediate" as const,
+    durationMinutes: 30,
+    environment: "gym" as const,
+    gymId: "gym_bandung_david_sports",
+    space: "large" as const,
+    equipment: ["dumbbell", "cable_machine"],
+    equipmentSource: "gym_inventory" as const,
+    intensity: "vigorous" as const,
+  };
+  await expect(
+    generateWorkout(constraints, [], "access-token"),
+  ).rejects.toMatchObject({ status: 422, code: "UNFEASIBLE_PLAN" });
+  const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+  expect(JSON.parse(String(init.body))).toMatchObject({
+    goal: "strength",
+    workout_type: "strength",
+    duration_minutes: 30,
+    experience_level: "intermediate",
+    environment: "gym",
+    space: "large",
+    available_equipment: [],
+    equipment_source: "gym_inventory",
+    gym_id: "gym_bandung_david_sports",
+    focus_muscles: ["chest", "back", "shoulders", "biceps", "triceps"],
+    intensity: "vigorous",
+    save: true,
+  });
+});
+
+test("login uses the deployed API and current-user request carries the bearer token", async () => {
+  const fetchMock = jest.spyOn(globalThis, "fetch").mockResolvedValue(
+    response({ data: {
+      user: { id: "user-1", email: "athlete@example.test", role: "member" },
+      access_token: "access-token",
+      refresh_token: "refresh-token",
+      token_type: "Bearer",
+      access_token_expires_at: "2026-11-25T12:00:00Z",
+      refresh_token_expires_at: "2026-12-25T12:00:00Z",
+    }, meta: { request_id: "request-1" } }),
+  );
+  const pair = await loginApi("Athlete@example.test", "correct-horse-battery-staple");
+  expect(pair.user.email).toBe("athlete@example.test");
+  expect(fetchMock.mock.calls[0][0]).toBe(`${API_CLIENT_BASES.ambatumove}/auth/login`);
+  expect(JSON.parse(String((fetchMock.mock.calls[0][1] as RequestInit).body))).toEqual({ email: "athlete@example.test", password: "correct-horse-battery-staple" });
+  fetchMock.mockResolvedValueOnce(response({ data: { id: "user-1", email: "athlete@example.test", role: "member" }, meta: { request_id: "request-2" } }));
+  await expect(getCurrentUser("access-token")).resolves.toMatchObject({ id: "user-1", email: "athlete@example.test" });
+  expect(new Headers((fetchMock.mock.calls[1][1] as RequestInit).headers).get("authorization")).toBe("Bearer access-token");
 });
 
 test("API errors preserve network, authentication, HTTP, and missing-data categories", () => {

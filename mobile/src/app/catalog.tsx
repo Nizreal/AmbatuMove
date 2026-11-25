@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, View } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -12,9 +12,10 @@ import {
   Txt,
   styles,
 } from "../components/ui";
-import { ExerciseInfo, ExercisePhoto } from "../components/exercise";
-import { alternatives, Exercise, itemFor, labels } from "../domain/workout";
+import { ExerciseInfo, ExercisePhoto, FavoriteToggle } from "../components/exercise";
+import { Exercise, itemFor, labels } from "../domain/workout";
 import { useStore } from "../hooks/store";
+import { describeApiError, getExerciseAlternatives } from "../services/ambatumove";
 import { colors, space } from "../theme";
 export default function Catalog() {
   const s = useStore(),
@@ -22,16 +23,33 @@ export default function Catalog() {
     [query, setQuery] = useState(""),
     [muscle, setMuscle] = useState("full"),
     [equipment, setEquipment] = useState("all"),
-    [selectedId, setSelectedId] = useState("");
+    [selectedId, setSelectedId] = useState(""),
+    [alternativeIds, setAlternativeIds] = useState<string[]>([]),
+    [alternativesLoading, setAlternativesLoading] = useState(false),
+    [alternativesError, setAlternativesError] = useState("");
   const insets = useSafeAreaInsets();
   const catalog = s.catalog;
   const index = swap === undefined ? null : Number(swap);
+  const current = index !== null ? s.plan?.items[index] : null;
+  const currentExercise = current?.exercise;
+  const constraints = s.plan?.constraints;
+  useEffect(() => {
+    let alive = true;
+    if (index === null || !currentExercise || !constraints) return;
+    void Promise.resolve().then(() => {
+      if (!alive) return undefined;
+      setAlternativesLoading(true);
+      setAlternativesError("");
+      return getExerciseAlternatives(currentExercise, constraints);
+    })
+      .then((ids) => { if (alive && ids) setAlternativeIds(ids); })
+      .catch((error) => { if (alive) { setAlternativeIds([]); setAlternativesError(describeApiError(error)); } })
+      .finally(() => { if (alive) setAlternativesLoading(false); });
+    return () => { alive = false; };
+  }, [currentExercise, index, constraints]);
   const candidates = useMemo(
-    () =>
-      index !== null && s.plan && s.plan.items[index]
-        ? alternatives(catalog, s.plan, index)
-        : catalog,
-    [index, s.plan, catalog],
+    () => index !== null ? catalog.filter((exercise) => alternativeIds.includes(exercise.id)) : catalog,
+    [index, catalog, alternativeIds],
   );
   const results = candidates.filter(
     (e) =>
@@ -48,10 +66,13 @@ export default function Catalog() {
     const p = s.plan;
     if (!p) return;
     const item = itemFor(e, p.constraints);
+    const localItems = p.items.map(({ backendItemId: _backendItemId, ...old }) => old);
     if (index !== null) {
       const updated = {
         ...p,
-        items: p.items.map((old, i) =>
+        backendWorkoutId: null,
+        backendVersion: undefined,
+        items: localItems.map((old, i) =>
           i === index
             ? {
                 ...item,
@@ -65,11 +86,15 @@ export default function Catalog() {
       };
       s.setPlan(updated);
     } else {
-      s.setPlan({ ...p, items: [...p.items, item] });
+      s.setPlan({
+        ...p,
+        backendWorkoutId: null,
+        backendVersion: undefined,
+        items: [...localItems, item],
+      });
     }
     router.back();
   }
-  const current = index !== null ? s.plan?.items[index] : null;
   if (index !== null && current) {
     const selected = results.find((e) => e.id === selectedId);
     return (
@@ -86,6 +111,8 @@ export default function Catalog() {
         <Notice
           message={`Pilih pengganti dengan fokus ${labels[current.exercise.muscle].toLowerCase()} yang sama dan sesuai kondisi latihan.`}
         />
+        {alternativesLoading && <Notice message="Mencari alternatif dari AmbatuMove…" />}
+        {!!alternativesError && <Notice error message={`Alternatif belum tersedia. ${alternativesError}`} />}
         <View style={styles.planCard}>
           <Txt variant="small" color={colors.primary}>
             Gerakan saat ini
@@ -135,9 +162,7 @@ export default function Catalog() {
             </Pressable>
           );
         })}
-        {!results.length && (
-          <Notice message="Tidak ada alternatif yang cocok dengan kondisi ini." />
-        )}
+        {!alternativesLoading && !alternativesError && !results.length && <Notice message="AmbatuMove tidak menemukan alternatif yang sesuai untuk kondisi ini." />}
       </Screen>
     );
   }
@@ -164,6 +189,7 @@ export default function Catalog() {
           </Txt>
           {s.catalogLoading && <Notice message="Memuat katalog resmi…" />}
           {s.catalogError && <Notice error message={s.catalogError} />}
+          {s.catalogError && catalog.length > 0 && <Notice message="Data tersimpan dari sinkronisasi terakhir yang berhasil; daftar ini mungkin belum terbaru." />}
           {s.catalogError && !s.catalogLoading && (
             <Button
               secondary
@@ -213,6 +239,7 @@ export default function Catalog() {
           s.plan?.items.some((p) => p.exercise.id === item.id);
         return (
           <View style={styles.card}>
+            <FavoriteToggle exercise={item} />
             <ExercisePhoto exercise={item} />
             <ExerciseInfo exercise={item} />
             <Button
