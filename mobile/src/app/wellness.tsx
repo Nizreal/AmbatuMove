@@ -1,8 +1,8 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { router } from "expo-router";
 import { Pressable, View } from "react-native";
-import { Screen, Txt, styles } from "../../components/ui";
-import { colors, space } from "../../theme";
+import { Screen, Txt, styles } from "../components/ui";
+import { colors, space } from "../theme";
 
 function WellnessAction({
   icon,
@@ -29,15 +29,9 @@ function WellnessAction({
       </View>
       <View style={{ flex: 1, gap: 2 }}>
         <Txt variant="label">{title}</Txt>
-        <Txt variant="small" color={colors.muted}>
-          {detail}
-        </Txt>
+        <Txt variant="small" color={colors.muted}>{detail}</Txt>
       </View>
-      <MaterialCommunityIcons
-        name="chevron-right"
-        size={23}
-        color={colors.muted}
-      />
+      <MaterialCommunityIcons name="chevron-right" size={23} color={colors.muted} />
     </Pressable>
   );
 }
@@ -61,14 +55,13 @@ export default function Wellness() {
         <WellnessAction
           icon="medical-bag"
           title="Bantuan profesional"
-          detail="Jelajahi direktori tenaga kesehatan · AmbatuFit"
+          detail="Ketersediaan integrasi direktori · AmbatuFit"
           onPress={() => router.push("/professionals")}
         />
       </View>
       <Txt variant="small" color={colors.muted}>
-        Pilih layanan untuk melihat detail. Catatan protein tersimpan di
-        perangkat; direktori profesional menampilkan informasi publik yang
-        tersedia.
+        Catatan protein tersimpan di perangkat. Direktori AmbatuFit belum dapat
+        diakses; profil atau jadwal tidak akan ditampilkan dari data contoh.
       </Txt>
     </Screen>
   );

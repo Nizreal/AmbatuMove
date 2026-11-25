@@ -59,7 +59,7 @@ export default function Profile() {
       <Txt variant="title">Profil</Txt>
       <View style={styles.profileIntro}>
         <Avatar label={initials(s.user ?? "AmbatuMove")} size={104} />
-        <Txt variant="heading">Akun Anda</Txt>
+        <Txt variant="heading">Akun AmbatuMove</Txt>
         <Txt color={colors.muted}>{s.user ?? ""}</Txt>
       </View>
       <View style={styles.profileEmail}>
@@ -75,13 +75,24 @@ export default function Profile() {
           <Txt variant="label">{s.user ?? "—"}</Txt>
         </View>
       </View>
+      <View style={styles.profileEmail}>
+        <MaterialCommunityIcons
+          name="shield-check-outline"
+          size={22}
+          color={colors.primary}
+        />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Txt variant="small" color={colors.muted}>Peran akun</Txt>
+          <Txt variant="label">{s.userInfo?.role ?? "Tidak tersedia"}</Txt>
+        </View>
+      </View>
       {!!s.error && <Txt color={colors.error}>{s.error}</Txt>}
       <Txt
         variant="small"
         color={colors.muted}
         style={{ textAlign: "center", marginTop: space.md }}
       >
-        Akun demo tersimpan lokal.
+        Akun dan sesi workout disinkronkan melalui AmbatuMove. Preferensi favorit, target, dan preset disimpan di perangkat ini.
       </Txt>
     </Screen>
   );

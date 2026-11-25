@@ -3,6 +3,7 @@ import {
   Exercise,
   Plan,
   PlanItem,
+  Session,
   labels,
   uid,
 } from "../domain/workout";
@@ -10,9 +11,7 @@ import { exercisePhoto } from "../data/exercise-media";
 import { Platform } from "react-native";
 
 const AMBATUMOVE_PUBLIC_API = "https://nizdri.stei.fun/api/v1";
-const AMBATUFIT_PUBLIC_API = "https://ambatufit.stei.fun/api/v1";
 const AMBATUMOVE_WEB_PROXY = "/__dev_proxy/ambatumove";
-const AMBATUFIT_WEB_PROXY = "/__dev_proxy/ambatufit";
 const trimTrailingSlashes = (value: string) => value.replace(/\/+$/, "");
 export function resolveApiBase(
   platform: string,
@@ -31,16 +30,8 @@ export const AMBATUMOVE_API = resolveApiBase(
   AMBATUMOVE_PUBLIC_API,
   AMBATUMOVE_WEB_PROXY,
 );
-const AMBATUFIT_API = resolveApiBase(
-  Platform.OS,
-  __DEV__,
-  process.env.EXPO_PUBLIC_AMBATUFIT_API_URL,
-  AMBATUFIT_PUBLIC_API,
-  AMBATUFIT_WEB_PROXY,
-);
 export const API_CLIENT_BASES = {
   ambatumove: AMBATUMOVE_API,
-  ambatufit: AMBATUFIT_API,
 };
 
 export type ApiErrorKind =
@@ -98,11 +89,45 @@ export type GymOption = {
   address?: { formatted?: string; city?: string };
   verificationStatus?: string;
 };
+export type ApiUser = {
+  id: string;
+  email: string;
+  role: string;
+  created_at?: string;
+};
+export type TokenPair = {
+  user: ApiUser;
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  access_token_expires_at: string;
+  refresh_token_expires_at: string;
+};
+export type WorkoutLogRecord = {
+  id: string;
+  session_id: string | null;
+  status: "completed" | "partial" | "skipped" | string;
+  started_at: string;
+  finished_at: string;
+  notes?: string;
+  items: string[];
+  created_at?: string;
+};
+export type CoachResponse = {
+  answer: string;
+  safety_classification: "general" | "caution" | "urgent";
+  suggested_actions: string[];
+  request_id: string;
+  limitations: string;
+  provider?: string;
+  model?: string;
+};
 
 async function request<T>(
   path: string,
   init?: RequestInit,
   baseUrl = AMBATUMOVE_API,
+  accessToken?: string,
 ): Promise<T> {
   const url = `${baseUrl}${path}`;
   const method = init?.method ?? "GET";
@@ -117,6 +142,7 @@ async function request<T>(
     if (!headers.has("Accept")) headers.set("Accept", "application/json");
     if (init?.body && !headers.has("Content-Type"))
       headers.set("Content-Type", "application/json");
+    if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
     if (__DEV__) console.info(`[api] ${method} ${url}`);
     const response = await fetch(url, {
       ...init,
@@ -124,6 +150,7 @@ async function request<T>(
       headers,
     });
     const bodyText = await response.text();
+    if (response.status === 204 && !bodyText) return undefined as T;
     let payload: unknown;
     let invalidJson = false;
     if (bodyText) {
@@ -183,6 +210,105 @@ async function request<T>(
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function requireEnvelopeData<T>(payload: unknown, url: string): T {
+  return requireData(payload as Envelope<T> | undefined, url);
+}
+
+export async function loginApi(email: string, password: string) {
+  const url = `${AMBATUMOVE_API}/auth/login`;
+  const payload = await request<Envelope<TokenPair>>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+  });
+  const pair = requireData(payload, url);
+  if (!pair?.access_token || !pair.refresh_token || !pair.user?.email)
+    throw new ApiError("invalid-response", "Data sesi akun tidak lengkap.", url);
+  return pair;
+}
+
+export async function registerApi(email: string, password: string) {
+  const url = `${AMBATUMOVE_API}/auth/register`;
+  const payload = await request<Envelope<TokenPair>>("/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+  });
+  const pair = requireData(payload, url);
+  if (!pair?.access_token || !pair.refresh_token || !pair.user?.email)
+    throw new ApiError("invalid-response", "Data sesi akun tidak lengkap.", url);
+  return pair;
+}
+
+export async function refreshApiTokens(refreshToken: string) {
+  const url = `${AMBATUMOVE_API}/auth/refresh`;
+  const payload = await request<Envelope<TokenPair>>("/auth/refresh", {
+    method: "POST",
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+  const pair = requireData(payload, url);
+  if (!pair?.access_token || !pair.refresh_token || !pair.user?.email)
+    throw new ApiError("invalid-response", "Token baru tidak lengkap.", url);
+  return pair;
+}
+
+export async function getCurrentUser(accessToken: string) {
+  const url = `${AMBATUMOVE_API}/me`;
+  const payload = await request<Envelope<ApiUser>>("/me", undefined, AMBATUMOVE_API, accessToken);
+  const user = requireData(payload, url);
+  if (!user?.id || !user.email)
+    throw new ApiError("invalid-response", "Profil akun tidak lengkap.", url);
+  return user;
+}
+
+type FitnessProfile = {
+  goal: string;
+  experience_level: string;
+  preferred_activity_ids: string[];
+  equipment: string[];
+  environment: string;
+  space: string;
+  weight_kg?: number | null;
+  excluded_ids: string[];
+  updated_at?: string;
+};
+
+export async function getFitnessProfile(accessToken: string) {
+  const path = "/me/fitness-profile";
+  const payload = await request<Envelope<FitnessProfile>>(path, undefined, AMBATUMOVE_API, accessToken);
+  return requireEnvelopeData<FitnessProfile>(payload, `${AMBATUMOVE_API}${path}`);
+}
+
+export async function saveFitnessPreferences(accessToken: string, constraints: Constraints) {
+  let previous: FitnessProfile | undefined;
+  try {
+    previous = await getFitnessProfile(accessToken);
+  } catch (error) {
+    if (!(error instanceof ApiError) || error.kind !== "missing-data" || error.status !== 404) throw error;
+  }
+  const path = "/me/fitness-profile";
+  const body: FitnessProfile = {
+    goal: constraints.goal === "strength" ? "strength" : constraints.goal === "cardio" ? "endurance" : "general_fitness",
+    experience_level: constraints.experience,
+    preferred_activity_ids: previous?.preferred_activity_ids ?? [],
+    equipment: constraints.environment === "gym" && constraints.equipmentSource === "gym_inventory" ? previous?.equipment ?? [] : constraints.equipment,
+    environment: constraints.environment,
+    space: constraints.space,
+    ...(previous?.weight_kg !== undefined ? { weight_kg: previous.weight_kg } : {}),
+    excluded_ids: previous?.excluded_ids ?? [],
+  };
+  await request<Envelope<FitnessProfile>>(path, { method: "PUT", body: JSON.stringify(body) }, AMBATUMOVE_API, accessToken);
+  if (!(constraints.environment === "gym" && constraints.equipmentSource === "gym_inventory")) {
+    const equipmentPath = "/me/equipment";
+    await request<Envelope<{ configured: boolean; equipment: string[] }>>(equipmentPath, {
+      method: "PUT",
+      body: JSON.stringify({ equipment: constraints.equipment }),
+    }, AMBATUMOVE_API, accessToken);
+  }
+}
+
+export async function logoutApi(accessToken: string) {
+  await request<void>("/auth/logout", { method: "POST" }, AMBATUMOVE_API, accessToken);
 }
 
 function requireData<T>(payload: Envelope<T> | undefined, url: string): T {
@@ -350,18 +476,24 @@ export async function getMuscleGroups(): Promise<MuscleOption[]> {
 }
 
 export async function getGyms(): Promise<GymOption[]> {
-  const url = `${AMBATUMOVE_API}/gyms?limit=100&offset=0`;
-  const result = await request<Envelope<Record<string, any>[]>>(
-    "/gyms?limit=100&offset=0",
-  );
-  const data = requireData(result, url);
-  if (!Array.isArray(data))
-    throw new ApiError(
-      "invalid-response",
-      "Format daftar gym tidak valid.",
-      url,
-    );
-  return data.map((item) => ({
+  const rows: Record<string, any>[] = [];
+  let offset = 0;
+  for (let pageNumber = 0; pageNumber < 100; pageNumber += 1) {
+    const path = `/gyms?limit=100&offset=${offset}`;
+    const url = `${AMBATUMOVE_API}${path}`;
+    const result = await request<Envelope<Record<string, any>[]>>(path);
+    const data = requireData(result, url);
+    if (!Array.isArray(data))
+      throw new ApiError("invalid-response", "Format daftar gym tidak valid.", url);
+    rows.push(...data);
+    const pagination = result.meta?.pagination as { has_more?: boolean; limit?: number } | undefined;
+    const hasMore = pagination?.has_more ?? data.length === 100;
+    if (!hasMore) break;
+    if (!data.length) throw new ApiError("invalid-response", "Paginasi direktori gym tidak valid.", url);
+    offset += pagination?.limit ?? 100;
+    if (pageNumber === 99) throw new ApiError("invalid-response", "Direktori gym melebihi batas paginasi.", url);
+  }
+  return rows.map((item) => ({
     id: String(item.id),
     name: String(item.name),
     address: item.address,
@@ -369,9 +501,36 @@ export async function getGyms(): Promise<GymOption[]> {
   }));
 }
 
-export async function getGymEquipment(
+const gymEquipmentCache = new Map<
+  string,
+  { expiresAt: number; items: EquipmentOption[] }
+>();
+const gymEquipmentRequests = new Map<string, Promise<EquipmentOption[]>>();
+const GYM_EQUIPMENT_CACHE_MS = 60_000;
+
+export function getGymEquipment(
   gymId: string,
 ): Promise<EquipmentOption[]> {
+  const cached = gymEquipmentCache.get(gymId);
+  if (cached && cached.expiresAt > Date.now())
+    return Promise.resolve(cached.items);
+  const existing = gymEquipmentRequests.get(gymId);
+  if (existing) return existing;
+
+  const pending = loadGymEquipment(gymId).then((items) => {
+    gymEquipmentCache.set(gymId, {
+      expiresAt: Date.now() + GYM_EQUIPMENT_CACHE_MS,
+      items,
+    });
+    return items;
+  }).finally(() => {
+    gymEquipmentRequests.delete(gymId);
+  });
+  gymEquipmentRequests.set(gymId, pending);
+  return pending;
+}
+
+async function loadGymEquipment(gymId: string): Promise<EquipmentOption[]> {
   const url = `${AMBATUMOVE_API}/gyms/${encodeURIComponent(gymId)}/equipment`;
   const result = await request<Envelope<Record<string, any>[]>>(
     `/gyms/${encodeURIComponent(gymId)}/equipment`,
@@ -408,8 +567,8 @@ type WorkoutRequest = {
   gym_id?: string;
   focus_muscles?: string[];
   intensity: Constraints["intensity"];
-  save: false;
-  seed: number;
+  save: boolean;
+  seed?: number;
 };
 type RawPrescription = {
   sets?: number;
@@ -423,7 +582,10 @@ type RawWorkoutItem = {
   prescription: RawPrescription;
 };
 
-function workoutRequest(c: Constraints): WorkoutRequest {
+function workoutRequest(
+  c: Constraints,
+  options: { save: boolean; seed?: number },
+): WorkoutRequest {
   return {
     goal:
       c.goal === "strength"
@@ -452,8 +614,8 @@ function workoutRequest(c: Constraints): WorkoutRequest {
     ...(c.environment === "gym" && c.gymId ? { gym_id: c.gymId } : {}),
     ...(c.focus !== "full" ? { focus_muscles: focusToGroups(c.focus) } : {}),
     intensity: c.intensity,
-    save: false,
-    seed: Math.floor(Math.random() * 2_000_000_000),
+    save: options.save,
+    ...(options.seed === undefined ? {} : { seed: options.seed }),
   };
 }
 
@@ -469,15 +631,35 @@ function focusToGroups(focus: string): string[] {
 export async function generateWorkout(
   constraints: Constraints,
   catalog: Exercise[],
+  accessToken: string,
+  options: { save?: boolean; seed?: number } = {},
 ): Promise<Plan> {
   const url = `${AMBATUMOVE_API}/workouts/generate`;
-  const result = await request<Envelope<Record<string, any>>>(
-    "/workouts/generate",
-    {
-      method: "POST",
-      body: JSON.stringify(workoutRequest(constraints)),
-    },
-  );
+  const payload = workoutRequest(constraints, {
+    save: options.save ?? true,
+    ...(options.seed === undefined ? {} : { seed: options.seed }),
+  });
+  let result: Envelope<Record<string, any>>;
+  try {
+    result = await request<Envelope<Record<string, any>>>(
+      "/workouts/generate",
+      { method: "POST", body: JSON.stringify(payload) },
+      AMBATUMOVE_API,
+      accessToken,
+    );
+  } catch (error) {
+    if (__DEV__) {
+      const apiError = error instanceof ApiError ? error : undefined;
+      console.warn("[workout] generation rejected", {
+        url,
+        request: payload,
+        response: apiError
+          ? { status: apiError.status, code: apiError.code, message: apiError.message }
+          : { message: error instanceof Error ? error.message : "Unknown error" },
+      });
+    }
+    throw error;
+  }
   const raw = requireData(result, url);
   if (!raw || !Array.isArray(raw.sections))
     throw new ApiError("invalid-response", "Format workout tidak valid.", url);
@@ -492,27 +674,16 @@ export async function generateWorkout(
     ...new Set(rawItems.map((item: any) => item.exercise_id)),
   ].filter((id) => !indexed.has(id));
   await Promise.all(
-    missing.map(async (id) => {
-      try {
-        indexed.set(id, await getExerciseDetails(id));
-      } catch {
-        /* keep the API workout response intact below */
-      }
-    }),
+    missing.map(async (id) => indexed.set(id, await getExerciseDetails(id))),
   );
   const items: PlanItem[] = rawItems.map((item: any) => {
-    const exercise = indexed.get(item.exercise_id) ?? {
-      id: item.exercise_id,
-      name: prettify(item.exercise_id.replace(/^(ex|act)_/, "")),
-      muscle: "general",
-      equipment: [],
-      space: "small" as const,
-      environments: [constraints.environment],
-      level: "beginner" as const,
-      timed: typeof item.prescription.duration_seconds === "number",
-      instructions: [],
-      reference: `${AMBATUMOVE_API}/exercises/${encodeURIComponent(item.exercise_id)}`,
-    };
+    const exercise = indexed.get(item.exercise_id);
+    if (!exercise)
+      throw new ApiError(
+        "missing-data",
+        `Gerakan ${item.exercise_id} tidak ditemukan di katalog aktif.`,
+        url,
+      );
     const isTimed = typeof item.prescription.duration_seconds === "number";
     return {
       exercise: { ...exercise, timed: isTimed },
@@ -521,6 +692,7 @@ export async function generateWorkout(
         ? item.prescription.duration_seconds!
         : Math.max(1, item.prescription.reps ?? 1),
       rest: Math.max(0, item.prescription.rest_seconds ?? 0),
+      backendItemId: item.item_id,
     };
   });
   if (!items.length)
@@ -537,9 +709,10 @@ export async function generateWorkout(
         : "Kebugaran";
   return {
     id: raw.id ?? uid(),
-    backendWorkoutId: raw.id,
+    backendWorkoutId: raw.saved === false ? undefined : raw.id,
     backendVersion: raw.version,
     backendEstimatedDurationSeconds: raw.estimated_duration_seconds,
+    backendSeed: raw.generation?.seed,
     title: `${goalLabel} · ${raw.constraints?.environment ?? constraints.environment}`,
     source: "recommendation",
     constraints: { ...constraints },
@@ -549,30 +722,175 @@ export async function generateWorkout(
   };
 }
 
-export type Professional = {
-  id: string;
-  displayName: string;
-  specialty: string;
-  description?: string;
-};
-export async function getProfessionals(): Promise<Professional[]> {
-  const url = `${AMBATUFIT_API}/professionals`;
-  const payload = await request<{
-    items?: Record<string, unknown>[];
-  }>("/professionals", undefined, AMBATUFIT_API);
-  if (!payload || typeof payload !== "object" || !Array.isArray(payload.items))
-    throw new ApiError(
-      "missing-data",
-      "Direktori tidak memiliki field items.",
-      url,
-    );
-  return payload.items
-    .filter((item) => item.is_active === true)
-    .map((item) => ({
-      id: String(item.id),
-      displayName: String(item.display_name),
-      specialty: String(item.specialty),
-      description:
-        typeof item.description === "string" ? item.description : undefined,
-    }));
+export async function getGymDetails(gymId: string): Promise<Record<string, unknown>> {
+  const url = `${AMBATUMOVE_API}/gyms/${encodeURIComponent(gymId)}`;
+  const result = await request<Envelope<Record<string, unknown>>>(
+    `/gyms/${encodeURIComponent(gymId)}`,
+  );
+  return requireData(result, url);
+}
+
+export async function getExerciseAlternatives(
+  original: Exercise,
+  constraints: Constraints,
+): Promise<string[]> {
+  const path = `/exercises/${encodeURIComponent(original.id)}/alternatives`;
+  const payload = await request<Envelope<{ alternatives?: { exercise_id: string }[] }>>(path, {
+    method: "POST",
+    body: JSON.stringify({
+      available_equipment: constraints.equipment,
+      experience_level: constraints.experience,
+      environment: constraints.environment,
+      space: constraints.space,
+      goal: constraints.goal === "strength" ? "strength" : constraints.goal === "cardio" ? "endurance" : "general_fitness",
+      max_results: 10,
+      excluded_exercise_ids: [],
+    }),
+  });
+  const data = requireEnvelopeData<{ alternatives?: { exercise_id: string }[] }>(payload, `${AMBATUMOVE_API}${path}`);
+  if (!Array.isArray(data.alternatives))
+    throw new ApiError("invalid-response", "Daftar alternatif tidak valid.", `${AMBATUMOVE_API}${path}`);
+  return data.alternatives.map((item) => String(item.exercise_id));
+}
+
+export async function getWorkoutLogs(accessToken: string): Promise<WorkoutLogRecord[]> {
+  const all: WorkoutLogRecord[] = [];
+  let offset = 0;
+  for (let pageNumber = 0; pageNumber < 100; pageNumber += 1) {
+    const path = `/workout-logs?limit=100&offset=${offset}`;
+    const url = `${AMBATUMOVE_API}${path}`;
+    const payload = await request<Envelope<Record<string, unknown>[]>>(path, undefined, AMBATUMOVE_API, accessToken);
+    const page = requireData(payload, url);
+    if (!Array.isArray(page))
+      throw new ApiError("invalid-response", "Format riwayat latihan tidak valid.", url);
+    all.push(...page.map((raw) => ({
+      id: String(raw.id ?? ""),
+      session_id: typeof raw.session_id === "string" ? raw.session_id : null,
+      status: String(raw.status ?? "unknown"),
+      started_at: String(raw.started_at ?? ""),
+      finished_at: String(raw.finished_at ?? ""),
+      notes: typeof raw.notes === "string" ? raw.notes : undefined,
+      items: Array.isArray(raw.items) ? raw.items.map(String) : [],
+      created_at: typeof raw.created_at === "string" ? raw.created_at : undefined,
+    })));
+    const pagination = payload.meta?.pagination as { has_more?: boolean; limit?: number } | undefined;
+    if (!(pagination?.has_more ?? page.length === 100)) return all;
+    if (page.length === 0)
+      throw new ApiError("invalid-response", "Paginasi riwayat tidak valid.", url);
+    offset += pagination?.limit ?? 100;
+  }
+  throw new ApiError("invalid-response", "Riwayat melebihi batas paginasi.", `${AMBATUMOVE_API}/workout-logs`);
+}
+
+export async function getWorkoutLog(accessToken: string, logId: string) {
+  const path = `/workout-logs/${encodeURIComponent(logId)}`;
+  const payload = await request<Envelope<WorkoutLogRecord>>(path, undefined, AMBATUMOVE_API, accessToken);
+  return requireEnvelopeData<WorkoutLogRecord>(payload, `${AMBATUMOVE_API}${path}`);
+}
+
+function sessionLogItems(session: Session) {
+  return session.plan.items.flatMap((item, index) => {
+    const completedSets = session.actual[index].filter((status) => status === "completed").length;
+    if (completedSets === 0) return [];
+    return [{
+      exercise_id: item.exercise.id,
+      ...(!item.exercise.timed ? { performed_sets: Array.from({ length: completedSets }, () => ({ reps: item.target })) } : {}),
+      ...(item.exercise.timed ? { actual_duration_seconds: completedSets * item.target } : {}),
+    }];
+  });
+}
+
+export async function saveCompletedSession(accessToken: string, session: Session) {
+  const completedSets = session.actual.flat().filter((status) => status === "completed").length;
+  const totalSets = session.actual.flat().length;
+  const status = completedSets === 0 ? "skipped" : completedSets === totalSets ? "completed" : "partial";
+  const startedAt = session.startedAt;
+  const finishedAt = session.finishedAt ?? new Date().toISOString();
+  const idempotencyKey = `ambatumove-${session.id}`;
+  if (status !== "skipped" && session.plan.backendWorkoutId && session.plan.items.every((item) => item.backendItemId)) {
+    const path = `/workouts/${encodeURIComponent(session.plan.backendWorkoutId)}/complete`;
+    const payload = await request<Envelope<WorkoutLogRecord>>(path, {
+      method: "POST",
+      headers: { "Idempotency-Key": idempotencyKey },
+      body: JSON.stringify({
+        status,
+        started_at: startedAt,
+        finished_at: finishedAt,
+        items: session.plan.items.flatMap((item, index) => {
+          const completedSets = session.actual[index].filter((setStatus) => setStatus === "completed").length;
+          if (completedSets === 0) return [];
+          return [{
+            item_id: item.backendItemId,
+            exercise_id: item.exercise.id,
+            ...(!item.exercise.timed ? { performed_sets: Array.from({ length: completedSets }, () => ({ reps: item.target })) } : {}),
+            ...(item.exercise.timed ? { actual_duration_seconds: completedSets * item.target } : {}),
+          }];
+        }),
+      }),
+    }, AMBATUMOVE_API, accessToken);
+    return requireEnvelopeData<WorkoutLogRecord>(payload, `${AMBATUMOVE_API}${path}`);
+  }
+  const path = "/workout-logs/manual";
+  const payload = await request<Envelope<WorkoutLogRecord>>(path, {
+    method: "POST",
+    headers: { "Idempotency-Key": idempotencyKey },
+    body: JSON.stringify({
+      status,
+      started_at: startedAt,
+      finished_at: finishedAt,
+      notes: session.plan.title.slice(0, 2000),
+      items: sessionLogItems(session),
+    }),
+  }, AMBATUMOVE_API, accessToken);
+  return requireEnvelopeData<WorkoutLogRecord>(payload, `${AMBATUMOVE_API}${path}`);
+}
+
+const progressionRequests = new Map<
+  string,
+  Promise<{ lookback_days?: number; items?: Record<string, unknown>[] }>
+>();
+
+export function getProgression(accessToken: string, timezone: string) {
+  const path = `/me/progression?days=90&limit=20&timezone=${encodeURIComponent(timezone)}`;
+  const key = `${accessToken}\n${timezone}`;
+  const existing = progressionRequests.get(key);
+  if (existing) return existing;
+  const pending = request<Envelope<{ lookback_days?: number; items?: Record<string, unknown>[] }>>(
+    path,
+    undefined,
+    AMBATUMOVE_API,
+    accessToken,
+  ).then((payload) =>
+    requireEnvelopeData<{ lookback_days?: number; items?: Record<string, unknown>[] }>(payload, `${AMBATUMOVE_API}${path}`),
+  ).finally(() => {
+    progressionRequests.delete(key);
+  });
+  progressionRequests.set(key, pending);
+  return pending;
+}
+
+export async function chatWithCoach(
+  accessToken: string,
+  message: string,
+  consentExternalProcessing: boolean,
+  previousTurns: { role: "user" | "assistant"; content: string }[] = [],
+) {
+  const path = "/coach/chat";
+  const payload = await request<Envelope<CoachResponse>>(path, {
+    method: "POST",
+    body: JSON.stringify({
+      message: message.trim(),
+      consent_external_processing: consentExternalProcessing,
+      previous_turns: previousTurns.slice(-6).map((turn) => ({
+        role: turn.role,
+        content: turn.content.slice(0, 1000),
+      })),
+      include_profile_context: false,
+      include_training_history: false,
+    }),
+  }, AMBATUMOVE_API, accessToken);
+  const data = requireEnvelopeData<CoachResponse>(payload, `${AMBATUMOVE_API}${path}`);
+  if (!data.answer || !["general", "caution", "urgent"].includes(data.safety_classification))
+    throw new ApiError("invalid-response", "Format jawaban coach tidak valid.", `${AMBATUMOVE_API}${path}`);
+  return data;
 }

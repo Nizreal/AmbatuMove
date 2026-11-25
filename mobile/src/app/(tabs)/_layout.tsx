@@ -30,13 +30,13 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
-        name="history"
+        name="explore"
         options={{
-          title: "Riwayat latihan",
-          tabBarLabel: "Riwayat",
+          title: "Jelajahi",
+          tabBarLabel: "Jelajahi",
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
-              name="history"
+              name="compass-outline"
               color={typeof color === "string" ? color : colors.primary}
               size={size}
             />
@@ -44,16 +44,26 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
-        name="wellness"
+        name="progress"
         options={{
-          title: "Kesehatan",
-          tabBarLabel: "Kesehatan",
+          title: "Progres",
+          tabBarLabel: "Progres",
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
-              name="heart-pulse"
+              name="chart-line"
               color={typeof color === "string" ? color : colors.primary}
               size={size}
             />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="history"
+        options={{
+          title: "Riwayat",
+          tabBarLabel: "Riwayat",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="history" color={typeof color === "string" ? color : colors.primary} size={size} />
           ),
         }}
       />

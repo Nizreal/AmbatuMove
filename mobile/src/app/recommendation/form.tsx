@@ -13,10 +13,12 @@ import {
 import { useStore } from "../../hooks/store";
 import { labels, validateConstraints } from "../../domain/workout";
 import {
+  ApiError,
   EquipmentOption,
   describeApiError,
   generateWorkout,
   getGymEquipment,
+  saveFitnessPreferences,
 } from "../../services/ambatumove";
 import { colors, space } from "../../theme";
 
@@ -80,10 +82,25 @@ export default function Form() {
     setBusy(true);
     setError("");
     try {
-      s.setPlan(await generateWorkout(c, s.catalog));
+      s.setPlan(await s.withAuth(async (token) => {
+        let preferenceWarning = "";
+        try { await saveFitnessPreferences(token, c); }
+        catch (preferenceError) {
+          if (preferenceError instanceof ApiError && preferenceError.kind === "authentication") throw preferenceError;
+          preferenceWarning = "Preferensi akun belum tersinkron. Rencana dibuat dari pilihan formulir ini.";
+        }
+        const generated = await generateWorkout(c, s.catalog, token);
+        return preferenceWarning ? { ...generated, warnings: [...(generated.warnings ?? []), preferenceWarning] } : generated;
+      }));
       router.push("/recommendation/result");
     } catch (e) {
-      setError(describeApiError(e));
+      if (e instanceof ApiError && e.code === "UNFEASIBLE_PLAN") {
+        setError(
+          "Belum ada rencana yang memenuhi semua pilihan latihan saat ini. Pilihan Anda tetap tersimpan. Coba ubah durasi, ruang gerak, fokus, atau alat yang tersedia.",
+        );
+      } else {
+        setError(describeApiError(e));
+      }
     } finally {
       setBusy(false);
     }
@@ -225,7 +242,7 @@ export default function Form() {
               }
             />
           )}
-          {c.gymId && (
+          {!!c.gymId && (
             <Txt variant="small" color={colors.muted}>
               Status data:{" "}
               {s.gyms.find((gym) => gym.id === c.gymId)?.verificationStatus ??
@@ -329,7 +346,7 @@ export default function Form() {
           Intensitas diteruskan ke perencana AmbatuMove.
         </Txt>
       </View>
-      {c.environment === "gym" && c.gymId && (
+      {c.environment === "gym" && !!c.gymId && (
         <Notice message="Direktori gym berisi data fasilitas yang bisa belum terverifikasi. Periksa alat di lokasi sebelum latihan." />
       )}
     </Screen>

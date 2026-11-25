@@ -44,7 +44,7 @@ export default function ProteinTracker() {
   const [grams, setGrams] = useState("");
   const [error, setError] = useState("");
   const [goalInput, setGoalInput] = useState("100");
-  const storageKey = keyFor(s.user ?? "demo@ambatumove.app");
+  const storageKey = keyFor(s.user ?? "");
   const ready = loadedFor === storageKey;
 
   useEffect(() => {

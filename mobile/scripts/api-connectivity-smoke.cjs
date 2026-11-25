@@ -5,7 +5,6 @@ const routes = [
   "/__dev_proxy/ambatumove/exercises?limit=100&offset=0&sort=name",
   "/__dev_proxy/ambatumove/equipment",
   "/__dev_proxy/ambatumove/gyms?limit=100&offset=0",
-  "/__dev_proxy/ambatufit/professionals",
 ];
 
 async function run() {
@@ -18,7 +17,8 @@ async function run() {
         requests.push({ method: request.method(), url: request.url() });
       }
     });
-    await page.goto(origin, { waitUntil: "networkidle", timeout: 120000 });
+    await page.goto(origin, { waitUntil: "domcontentloaded", timeout: 120000 });
+    await page.getByTestId("login").waitFor({ timeout: 120000 });
 
     const catalogCalls = await page.evaluate(async (paths) => {
       const results = {};

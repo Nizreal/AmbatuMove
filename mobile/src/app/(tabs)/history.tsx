@@ -1,183 +1,49 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { useState } from "react";
 import { router } from "expo-router";
+import { useMemo, useState } from "react";
 import { Pressable, View } from "react-native";
-import {
-  Button,
-  Chips,
-  Notice,
-  Screen,
-  Txt,
-  styles,
-} from "../../components/ui";
-import { dateLabel } from "../../components/session-summary";
-import { Alert } from "../../components/confirm";
+import { Button, Chips, Notice, Screen, Txt, styles } from "../../components/ui";
+import { sessionCalories } from "../../domain/workout";
 import { useStore } from "../../hooks/store";
-import { counts, Session, sessionCalories } from "../../domain/workout";
+import { WorkoutLogRecord } from "../../services/ambatumove";
 import { colors } from "../../theme";
 
 type Period = "all" | "week" | "month";
-function isInPeriod(session: Session, period: Period) {
+function isInPeriod(log: WorkoutLogRecord, period: Period) {
   if (period === "all") return true;
-  const elapsed = Date.now() - Date.parse(session.startedAt);
-  return (
-    elapsed >= 0 &&
-    elapsed <= (period === "week" ? 7 : 31) * 24 * 60 * 60 * 1000
-  );
+  const elapsed = Date.now() - Date.parse(log.finished_at || log.started_at);
+  return elapsed >= 0 && elapsed <= (period === "week" ? 7 : 31) * 24 * 60 * 60 * 1000;
 }
+const dateLabel = (value: string) => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "Waktu tidak tersedia" : date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+};
 
 export default function History() {
   const s = useStore();
   const [period, setPeriod] = useState<Period>("all");
-  const sessions = s.history.filter((session) => isInPeriod(session, period));
+  const logs = useMemo(() => s.remoteHistory.filter((log) => isInPeriod(log, period)), [s.remoteHistory, period]);
   return (
     <Screen>
       <Txt variant="title">Riwayat workout</Txt>
-      <Txt color={colors.muted}>
-        Sesi dan progres yang tersimpan di perangkat.
-      </Txt>
-      {!!s.error && <Notice error message={s.error} />}
-      {!!s.error && (
-        <Button
-          secondary
-          title="Coba simpan lagi"
-          onPress={() => void s.retrySave()}
-        />
-      )}
-      {s.history.length ? (
-        <Chips
-          values={["all", "week", "month"] as const}
-          selected={period}
-          names={{ all: "Semua", week: "7 hari", month: "30 hari" }}
-          onSelect={setPeriod}
-        />
-      ) : null}
-      {!s.history.length ? (
-        <View style={styles.emptyState}>
-          <MaterialCommunityIcons
-            name="calendar-blank-outline"
-            size={34}
-            color={colors.primary}
-          />
-          <Txt variant="heading">Belum ada sesi</Txt>
-          <Txt color={colors.muted}>
-            Setelah latihan, hasilnya akan tersimpan di sini.
-          </Txt>
-          <Button
-            title="Rencanakan latihan"
-            onPress={() => router.push("/recommendation/form")}
-          />
-        </View>
-      ) : !sessions.length ? (
-        <Notice message="Tidak ada sesi pada periode ini. Pilih rentang waktu lain untuk melihat riwayat." />
-      ) : (
-        sessions.map((session) => {
-          const stat = counts(session);
-          const calories = sessionCalories(session);
-          const duration = session.finishedAt
-            ? Math.max(
-                1,
-                Math.round(
-                  (Date.parse(session.finishedAt) -
-                    Date.parse(session.startedAt)) /
-                    60000,
-                ),
-              )
-            : null;
-          return (
-            <View key={session.id} style={styles.historyItem}>
-              <View style={styles.historyIcon}>
-                <MaterialCommunityIcons
-                  name="dumbbell"
-                  size={20}
-                  color={colors.primary}
-                />
-              </View>
-              <View style={{ flex: 1, gap: 3 }}>
-                <Txt variant="label">{session.plan.title}</Txt>
-                <Txt variant="small" color={colors.muted}>
-                  {dateLabel(session.startedAt)}
-                </Txt>
-                <Txt variant="small">
-                  {session.plan.items.length} gerakan
-                  {duration ? ` · ${duration} menit` : ""} ·{" "}
-                  {session.plan.source === "manual" ? "Manual" : "Rekomendasi"}
-                </Txt>
-                <Txt variant="small" color={colors.primary}>
-                  ≈ {calories.totalKcal} kcal
-                </Txt>
-                <Txt variant="small" color={colors.muted}>
-                  Perkiraan lokal
-                </Txt>
-                <Txt
-                  variant="small"
-                  color={
-                    session.outcome === "completed"
-                      ? colors.success
-                      : colors.muted
-                  }
-                >
-                  {session.outcome === "completed" ? "Selesai" : "Parsial"} ·{" "}
-                  {stat.completed}/{stat.total} set
-                </Txt>
-              </View>
-              <View style={styles.historyActions}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`Lihat ${session.plan.title}`}
-                  style={styles.historyAction}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/history/[id]",
-                      params: { id: session.id },
-                    })
-                  }
-                >
-                  <MaterialCommunityIcons
-                    name="chevron-right"
-                    size={24}
-                    color={colors.primary}
-                  />
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`Hapus ${session.plan.title}`}
-                  style={[styles.historyAction, styles.historyDeleteAction]}
-                  onPress={() =>
-                    Alert.alert(
-                      "Hapus riwayat latihan?",
-                      "Sesi ini dan rincian kalori perkiraannya akan dihapus dari perangkat.",
-                      [
-                        { text: "Batal", style: "cancel" },
-                        {
-                          text: "Hapus",
-                          style: "destructive",
-                          onPress: () =>
-                            void s
-                              .removeHistory(session.id)
-                              .catch(() =>
-                                Alert.alert(
-                                  "Belum terhapus",
-                                  "Coba lagi sebentar.",
-                                  [{ text: "Tutup" }],
-                                ),
-                              ),
-                        },
-                      ],
-                    )
-                  }
-                >
-                  <MaterialCommunityIcons
-                    name="trash-can-outline"
-                    size={19}
-                    color={colors.error}
-                  />
-                </Pressable>
-              </View>
-            </View>
-          );
-        })
-      )}
+      <Txt color={colors.muted}>Sesi yang disimpan pada akun AmbatuMove.</Txt>
+      {s.historyLoading && <Notice message="Memuat riwayat akun…" />}
+      {s.historyError && <Notice error message={`Riwayat belum dapat dimuat. ${s.historyError}`} />}
+      {s.historyError && <Button secondary title="Coba lagi" onPress={() => void s.refreshHistory()} />}
+      {s.remoteHistory.length > 0 && <Chips values={["all", "week", "month"] as const} selected={period} names={{ all: "Semua", week: "7 hari", month: "30 hari" }} onSelect={setPeriod} />}
+      {!s.historyLoading && !s.historyError && s.remoteHistory.length === 0 && <View style={styles.emptyState}><MaterialCommunityIcons name="calendar-blank-outline" size={32} color={colors.primary} /><Txt variant="heading">Belum ada sesi tersimpan</Txt><Txt color={colors.muted}>Selesaikan workout dan simpan hasil untuk melihatnya di sini.</Txt><Button title="Rencanakan latihan" onPress={() => router.push("/recommendation/form")} /></View>}
+      {!s.historyLoading && logs.length === 0 && s.remoteHistory.length > 0 && <Notice message="Tidak ada sesi pada periode ini. Pilih rentang waktu lain." />}
+      {logs.map((log) => {
+        const local = s.history.find((session) => session.startedAt === log.started_at);
+        const title = log.notes?.trim() || local?.plan.title || "Sesi latihan";
+        const status = log.status === "completed" ? "Selesai" : log.status === "skipped" ? "Dilewati" : log.status === "partial" ? "Parsial" : log.status;
+        return <Pressable key={log.id} accessibilityRole="button" onPress={() => router.push({ pathname: "/history/[id]", params: { id: log.id } })} style={({ pressed }) => [styles.historyItem, pressed && { backgroundColor: colors.primarySoft }]}>
+          <View style={styles.historyIcon}><MaterialCommunityIcons name="dumbbell" size={20} color={colors.primary} /></View>
+          <View style={{ flex: 1, gap: 3 }}><Txt variant="label">{title}</Txt><Txt variant="small" color={colors.muted}>{dateLabel(log.started_at)}</Txt><Txt variant="small">{log.items.length} gerakan · {status}</Txt>{local ? <Txt variant="small" color={colors.primary}>≈ {sessionCalories(local).totalKcal} kcal · perkiraan lokal</Txt> : null}</View>
+          <MaterialCommunityIcons name="chevron-right" size={24} color={colors.primary} />
+        </Pressable>;
+      })}
+      {s.remoteHistory.length > 0 && <Notice message="Catatan workout dimuat dari server. Kalori hanya ditampilkan bila rincian lokal sesi tersedia; nilainya tetap perkiraan." />}
     </Screen>
   );
 }

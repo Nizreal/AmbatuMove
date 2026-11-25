@@ -70,6 +70,13 @@ function Navigation() {
             name="history/[id]"
             options={{ title: "Detail latihan" }}
           />
+          <Stack.Screen name="gyms" options={{ title: "Direktori gym" }} />
+          <Stack.Screen name="gym/[id]" options={{ title: "Detail gym" }} />
+          <Stack.Screen name="favorites" options={{ title: "Gerakan favorit" }} />
+          <Stack.Screen name="presets" options={{ title: "Preferensi tersimpan" }} />
+          <Stack.Screen name="weekly-goal" options={{ title: "Target mingguan" }} />
+          <Stack.Screen name="coach" options={{ title: "Coach latihan" }} />
+          <Stack.Screen name="wellness" options={{ title: "Kesehatan" }} />
           <Stack.Screen
             name="protein/index"
             options={{ title: "Protein harian" }}

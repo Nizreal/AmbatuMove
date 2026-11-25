@@ -26,20 +26,20 @@ export const radius = { sm: 6, md: 10, lg: 12, xl: 16, round: 999 };
 export const type = {
   display: {
     fontFamily: "BarlowSemiCondensed_700Bold",
-    fontSize: 38,
-    lineHeight: 42,
+    fontSize: 36,
+    lineHeight: 40,
     letterSpacing: -0.45,
   },
   title: {
     fontFamily: "BarlowSemiCondensed_600SemiBold",
-    fontSize: 30,
-    lineHeight: 36,
+    fontSize: 27,
+    lineHeight: 33,
     letterSpacing: -0.2,
   },
   heading: {
     fontFamily: "BarlowSemiCondensed_600SemiBold",
-    fontSize: 24,
-    lineHeight: 30,
+    fontSize: 22,
+    lineHeight: 28,
     letterSpacing: -0.1,
   },
   exercise: {
@@ -49,14 +49,14 @@ export const type = {
   },
   stat: {
     fontFamily: "BarlowSemiCondensed_600SemiBold",
-    fontSize: 34,
-    lineHeight: 38,
+    fontSize: 32,
+    lineHeight: 36,
     fontVariant: ["tabular-nums"] as const,
   },
   timer: {
     fontFamily: "BarlowSemiCondensed_600SemiBold",
-    fontSize: 54,
-    lineHeight: 60,
+    fontSize: 48,
+    lineHeight: 54,
     fontVariant: ["tabular-nums"] as const,
   },
   body: {

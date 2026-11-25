@@ -13,12 +13,11 @@ jest.mock("../hooks/store", () => ({ useStore: () => ({ login: jest.fn() }) }));
 jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
-test("login shows actionable validation before calling authentication", async () => {
+test("login validates an empty credential form without prefilled demo credentials", async () => {
   await render(<Login />);
   await fireEvent.press(screen.getByTestId("login"));
   expect(screen.getByText("Masukkan alamat email yang valid.")).toBeTruthy();
-  await fireEvent.press(screen.getByText("Isi akun demo"));
-  expect(screen.getByTestId("email").props.value).toBe("demo@ambatumove.app");
+  expect(screen.getByTestId("email").props.value).toBe("");
 });
 test("summary renders actual partial completion and pending set honestly", async () => {
   const exercise: Exercise = {

@@ -1,7 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Button, Notice, Screen, Txt } from "../../components/ui";
-import { ExerciseInfo, ExercisePhoto } from "../../components/exercise";
+import { ExerciseInfo, ExercisePhoto, FavoriteToggle } from "../../components/exercise";
 import { Exercise } from "../../domain/workout";
 import { getExerciseDetails } from "../../services/ambatumove";
 import { useStore } from "../../hooks/store";
@@ -71,6 +71,7 @@ export default function Detail() {
   return (
     <Screen>
       <ExercisePhoto exercise={exercise} large />
+      <FavoriteToggle exercise={exercise} />
       <ExerciseInfo exercise={exercise} />
       <Txt variant="heading">Panduan gerakan</Txt>
       {exercise.description && <Txt>{exercise.description}</Txt>}

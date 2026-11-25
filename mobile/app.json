@@ -38,7 +38,8 @@
           "image": "./assets/brand.png",
           "imageWidth": 160
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "scheme": "ambatumove"
   }

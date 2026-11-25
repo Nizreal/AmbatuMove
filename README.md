@@ -1,8 +1,8 @@
 # AmbatuMove
 
-## Mobile MVP (demo lokal)
+## Aplikasi mobile
 
-Aplikasi Expo Android berada di `mobile/`. Jalankan dari root:
+Aplikasi Expo Android berada di `mobile/` dan menggunakan API AmbatuMove yang dideploy. Jalankan dari root:
 
 ```sh
 cd mobile
@@ -10,11 +10,13 @@ npm ci
 npm start
 ```
 
-Pindai QR dengan Expo Go yang mendukung SDK 58, atau jalankan `npm run android` setelah emulator Android aktif. Pada Windows PowerShell gunakan `npm.cmd` bila wrapper skrip diblokir.
+Pindai QR dengan Expo Go yang mendukung SDK 58, atau jalankan `npm run android` setelah emulator Android aktif. Pada Windows PowerShell gunakan `npm.cmd` bila wrapper skrip diblokir. Untuk web, jalankan `npm run web` dari folder `mobile`; permintaan API development memakai proxy lokal Expo.
 
-Akun demo: `demo@ambatumove.app` / `Move123!` (tersedia juga lewat tombol **Isi akun demo**). Aplikasi memakai layanan mock lokal dan belum terhubung ke API di bawah. Katalog menyediakan 71 gerakan dengan 68 foto referensi offline; foto bersumber dari [Free Exercise DB](https://github.com/yuhonas/free-exercise-db) (Unlicense). Tiga gerakan kardio ringan memakai instruksi teks karena tidak memiliki gambar yang sesuai.
+Belum ada akun demo yang disediakan untuk aplikasi mobile. Pilih **Buat akun** pada halaman login untuk mendaftar ke API, atau masuk menggunakan akun AmbatuMove yang sudah terdaftar. Kata sandi minimal 12 karakter. Kredensial `demo@ambatumove.app` / `Move123!` yang pernah dicantumkan di dokumentasi ini berasal dari versi mock lama dan tidak berlaku untuk API saat ini.
 
-Kalori ditampilkan sebagai estimasi berbasis MET, bobot referensi 70 kg, dan set yang dikonfirmasi. Gerakan repetisi memakai asumsi 3 detik per repetisi; gerakan bertimer memakai durasi target. Angka ini bukan hasil pengukuran medis.
+Katalog gerakan, alat, dan gym dimuat dari API. Jumlahnya mengikuti data layanan dan dapat berubah; data katalog yang gagal dimuat tidak diganti dengan mock. Token sesi pada Android disimpan menggunakan SecureStore. Favorit, preset, dan target mingguan disimpan lokal per akun di perangkat.
+
+Kalori workout ditampilkan sebagai estimasi berbasis MET dengan bobot referensi 70 kg, bukan hasil pengukuran medis. Protein tracker saat ini menyimpan catatan lokal; pencarian nutrisi produk melalui barcode belum tersedia. Coach latihan menggunakan endpoint backend `/coach/chat` dan memerlukan login serta persetujuan pemrosesan eksternal untuk pertanyaan umum.
 
 [English](README.en.md) | [PDF](README.pdf) | [Referensi API (PDF)](docs/api-reference.pdf) | [HTML](docs/api-reference.html)
 

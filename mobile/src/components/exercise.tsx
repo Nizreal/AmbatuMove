@@ -1,10 +1,39 @@
-import { ActivityIndicator, View } from "react-native";
-import { useState } from "react";
+import { ActivityIndicator, Pressable, View } from "react-native";
+import { useEffect, useState } from "react";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Exercise, labels, PlanItem } from "../domain/workout";
-import { Button, Txt, styles } from "./ui";
+import { Button, Notice, Txt, styles } from "./ui";
 import { colors, radius } from "../theme";
+import { useStore } from "../hooks/store";
+import { featureStorage } from "../services/user-features";
+
+export function FavoriteToggle({ exercise, onChange }: { exercise: Exercise; onChange?: (favorite: boolean) => void }) {
+  const { user } = useStore();
+  const [favorite, setFavorite] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    let alive = true;
+    if (!user) return;
+    void featureStorage.favorites(user).then((ids) => { if (alive) setFavorite(ids.includes(exercise.id)); }).catch(() => { if (alive) setError("Favorit belum dapat dibaca."); });
+    return () => { alive = false; };
+  }, [user, exercise.id]);
+  async function toggle() {
+    if (!user) return;
+    try {
+      const ids = await featureStorage.favorites(user);
+      const next = ids.includes(exercise.id) ? ids.filter((id) => id !== exercise.id) : [...ids, exercise.id];
+      await featureStorage.setFavorites(user, next);
+      setFavorite(next.includes(exercise.id));
+      setError("");
+      onChange?.(next.includes(exercise.id));
+    } catch {
+      setError("Favorit belum tersimpan. Coba lagi.");
+    }
+  }
+  return <View style={{ alignItems: "flex-end" }}><Pressable accessibilityRole="button" accessibilityLabel={favorite ? `Hapus ${exercise.name} dari favorit` : `Tambahkan ${exercise.name} ke favorit`} accessibilityState={{ selected: favorite }} onPress={() => void toggle()} style={{ width: 48, height: 48, alignItems: "center", justifyContent: "center" }}><MaterialCommunityIcons name={favorite ? "star" : "star-outline"} size={22} color={favorite ? colors.primary : colors.muted} /></Pressable>{error ? <Notice error message={error} /> : null}</View>;
+}
 export function ExercisePhoto({
   exercise,
   large = false,

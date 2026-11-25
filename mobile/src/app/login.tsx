@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Image, Pressable, View } from "react-native";
 import { Button, Input, Notice, Screen, Txt, styles } from "../components/ui";
-import { DEMO, mockAuth } from "../services/mock";
 import { useStore } from "../hooks/store";
 import { colors, space } from "../theme";
+import { describeApiError } from "../services/ambatumove";
 
 export default function Login() {
   const s = useStore();
@@ -12,18 +12,18 @@ export default function Login() {
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [createAccount, setCreateAccount] = useState(false);
   async function submit() {
     setError("");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
       return setError("Masukkan alamat email yang valid.");
-    if (!password) return setError("Masukkan kata sandi demo.");
+    if (password.length < 12)
+      return setError("Kata sandi harus terdiri dari minimal 12 karakter.");
     setBusy(true);
     try {
-      await s.login(await mockAuth.login(email, password));
+      await s.login(email, password, createAccount);
     } catch (e) {
-      setError(
-        e instanceof Error ? e.message : "Tidak dapat masuk. Coba lagi.",
-      );
+      setError(describeApiError(e));
     } finally {
       setBusy(false);
     }
@@ -32,9 +32,9 @@ export default function Login() {
     <Screen standalone>
       <View style={styles.loginBrand}>
         <Image
-          source={require("../../assets/brand.png")}
+          source={require("../../assets/figma/brand-mark.png")}
           resizeMode="contain"
-          style={{ width: 56, height: 56 }}
+          style={{ width: 56, height: 48 }}
           accessibilityLabel="AmbatuMove"
         />
         <Txt variant="heading" color={colors.primary}>
@@ -42,11 +42,8 @@ export default function Login() {
         </Txt>
       </View>
       <View style={{ gap: space.sm }}>
-        <Txt variant="title">
-          Selamat datang di{" "}
-          <Txt variant="title" color={colors.primary}>
-            AmbatuMove
-          </Txt>
+        <Txt variant="title" color={createAccount ? colors.primary : colors.text}>
+          {createAccount ? "Buat akun AmbatuMove" : "Selamat datang"}
         </Txt>
         <Txt color={colors.muted}>
           Rencanakan latihan, jalani setiap gerakan, dan pantau progres Anda.
@@ -71,6 +68,8 @@ export default function Login() {
             onChangeText={setPassword}
             secureTextEntry={!show}
             autoCapitalize="none"
+            autoComplete={createAccount ? "new-password" : "current-password"}
+            textContentType={createAccount ? "newPassword" : "password"}
             returnKeyType="done"
             onSubmitEditing={() => void submit()}
             style={{ paddingRight: 54 }}
@@ -91,7 +90,7 @@ export default function Login() {
       </View>
       {!!error && <Notice error message={error} />}
       <Button
-        title="Masuk"
+        title={createAccount ? "Buat akun" : "Masuk"}
         testID="login"
         busy={busy}
         onPress={() => void submit()}
@@ -99,19 +98,14 @@ export default function Login() {
       <Pressable
         accessibilityRole="button"
         onPress={() => {
-          setEmail(DEMO.email);
-          setPassword(DEMO.password);
+          setCreateAccount((value) => !value);
+          setError("");
         }}
-        style={styles.demoBox}
+        style={{ minHeight: 48, alignItems: "center", justifyContent: "center" }}
       >
-        <View style={{ flex: 1, gap: 2 }}>
-          <Txt variant="label" color={colors.primary}>
-            Isi akun demo
-          </Txt>
-          <Txt variant="small" color={colors.muted}>
-            {DEMO.email} · {DEMO.password}
-          </Txt>
-        </View>
+        <Txt variant="label" color={colors.primary}>
+          {createAccount ? "Sudah punya akun? Masuk" : "Belum punya akun? Buat akun"}
+        </Txt>
       </Pressable>
     </Screen>
   );

@@ -1,6 +1,6 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { router } from "expo-router";
-import { Pressable, View } from "react-native";
+import { Image, Pressable, View } from "react-native";
 import {
   Avatar,
   Button,
@@ -10,7 +10,7 @@ import {
   styles,
 } from "../../components/ui";
 import { useStore } from "../../hooks/store";
-import { colors, space } from "../../theme";
+import { colors, radius, space } from "../../theme";
 import { uid } from "../../domain/workout";
 
 function Action({
@@ -79,13 +79,30 @@ export default function Home() {
           onPress={() => void s.retrySave()}
         />
       )}
-      <View style={styles.hero}>
-        <View style={{ gap: space.sm }}>
+      <View
+        style={{
+          minHeight: 164,
+          flexDirection: "row",
+          overflow: "hidden",
+          alignItems: "center",
+          backgroundColor: colors.accent,
+          borderRadius: radius.xl,
+          borderWidth: 1,
+          borderColor: colors.accent,
+        }}
+      >
+        <View style={{ flex: 1, gap: space.sm, padding: space.lg }}>
           <Txt variant="heading">Siap bergerak hari ini?</Txt>
-          <Txt color={colors.text}>
-            Pilih latihan sesuai waktu dan alat yang Anda punya.
+          <Txt variant="small" color={colors.text}>
+            Atur latihan sesuai waktu dan alat yang tersedia.
           </Txt>
         </View>
+        <Image
+          source={require("../../../assets/figma/athlete-hero.jpeg")}
+          resizeMode="cover"
+          accessibilityLabel="Atlet sedang berlari"
+          style={{ width: 112, height: 164, alignSelf: "flex-end" }}
+        />
       </View>
       {s.active ? (
         <Button
@@ -117,6 +134,13 @@ export default function Home() {
           }}
         />
       </View>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push("/(tabs)/progress")}
+        style={{ minHeight: 48, justifyContent: "center" }}
+      >
+        <Txt variant="label" color={colors.primary}>Lihat progres latihan</Txt>
+      </Pressable>
     </Screen>
   );
 }
